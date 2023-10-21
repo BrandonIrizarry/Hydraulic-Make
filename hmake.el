@@ -59,7 +59,12 @@ corresponding file."
                           (package-name (extract-package-name-from-unit package-unit)))
                      (if (string-match-p (rx "*" eos) package-unit)
                          (get-file-list this package-name)
-                       (lookup-file this package-unit))))))))
+                       (lookup-file this package-unit))))
+                  (_
+                   (cl-remove-if #'null (cl-loop for package-name in (get-packages this) collect
+                                              (let ((case-fold-search nil))
+                                                (if (string-match (rx-to-string `(seq ,package-name ".")) line)
+                                                    line)))))))))
     ;; We've accumulated imports from e.g. java.util as well which
     ;; show up as nils here: so get rid of them.
     (cl-remove-if #'null raw-entries)))
