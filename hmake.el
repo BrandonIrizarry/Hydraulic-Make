@@ -59,9 +59,10 @@ corresponding file."
          ;; Here, we explicitly assume that the directory hierarchy
          ;; and the package hierarchy are one and the same thing.
          (local-files (thread-last
-                              full-filename
-                              (find-package-name)
-                              (get-file-list this))))
+                        full-filename
+                        (find-package-name)
+                        (get-file-list this)
+                        (remove (find-simple-filename full-filename)))))
     (dolist (line lines)
       (pcase line
         ;; Skip the 'package' declaration, since these contain
