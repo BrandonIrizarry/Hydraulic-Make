@@ -43,6 +43,11 @@ packages are under 'src'.")
 (cl-defmethod get-packages ((this package-table))
   (hash-table-keys (package-table-table this)))
 
+(cl-defmethod to-assoc-list ((this package-table))
+  (let (result)
+    (maphash (lambda (k v) (push (cons k (list v)) result)) (package-table-table this))
+    result))
+
 (cl-defmethod lookup-file ((this package-table) package-unit)
   "Given PACKAGE-UNIT (e.g. 'application.MapApp'), return the
 corresponding file."
