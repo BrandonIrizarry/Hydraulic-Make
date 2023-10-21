@@ -55,8 +55,7 @@ corresponding file."
   (let* ((lines (get-program-lines full-filename))
          ;; For inline package references. We're using a hash table
          ;; here as a hash set, to avoid duplicates.
-         (mentions (make-hash-table :test #'equal))
-         deps)
+         (mentions (make-hash-table :test #'equal)))
     (dolist (line lines)
       (pcase line
         ;; Skip the 'package' declaration, since these contain
@@ -68,19 +67,21 @@ corresponding file."
                 (package-unit (car words))
                 (package-name (extract-package-name-from-unit package-unit)))
            (if (string-match-p (rx "*" eos) package-unit)
-               (nconc deps (get-file-list this package-name))
+               (let ((file-list (get-file-list this package-name)))
+                 (dolist (file file-list)
+                   (puthash file t mentions)))
              (let ((file (lookup-file this package-unit)))
                ;; Avoid 'nil' (for example, when dealing with
                ;; something like 'java.util')
                (when (stringp file)
-                 (push file deps))))))
+                 (puthash file t mentions))))))
         (_
          (dolist (package-name (get-packages this))
            (let ((case-fold-search nil))
              (if (string-match (rx-to-string `(seq ,package-name "." java-identifier)) line)
                  (let ((package-unit (match-string-no-properties 0 line)))
                    (puthash (lookup-file this package-unit) t mentions))))))))
-    (append (hash-table-keys mentions) deps)))
+    (hash-table-keys mentions)))
 
 (cl-defmethod generate-dependency-graph ((this package-table))
   (let ((all-files (get-all-files))
