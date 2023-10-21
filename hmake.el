@@ -78,7 +78,7 @@ corresponding file."
                    (puthash (lookup-file this package-unit) t mentions))))))))
     (append (hash-table-keys mentions) deps)))
 
-;;; The program itself ensues here.
+;;; Some helper functions
 
 (defun find-package-name (full-filename)
   "Return the package FULL-FILENAME belongs to, as a string."
