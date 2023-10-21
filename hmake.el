@@ -42,6 +42,19 @@ it encompasses."
         (push basic-name file-list)
         (puthash package-name file-list known-packages)))))
 
+;; Define what a Java multi-line comment is.
+(rx-define java-multi-line-comment
+    (: "/*" (*
+             (| (not "*")
+                (: "*" (not "/"))))
+     (+ "*") "/"))
+
+(defun get-program-lines (full-filename)
+  (with-temp-buffer
+    (insert-file full-filename)
+    (let ((content (replace-regexp-in-string (rx java-multi-line-comment) "" (buffer-string))))
+      (mapcar #'string-trim (string-split content "\n" t)))))
+
 ;; The "package-table" object: make it easy to look up a list of
 ;; files, given a package name.
 
@@ -83,3 +96,7 @@ it encompasses."
 (ert-deftest test-number-of-packages-is-17 ()
   (let ((table-obj (package-table-create)))
     (should (eql 17 (length (get-packages table-obj))))))
+
+(ert-deftest test-program-lines ()
+  (should (equal (get-program-lines "~/eclipse-workspace2/UCSDGraphs/src/gmapsfx/javascript/event/UIEventType.java")
+                 '("package gmapsfx.javascript.event;" "public enum UIEventType {" "" "click, dblclick, mousemove, mouseup, mousedown, mouseover, mouseout, rightclick;" "" "}"))))
