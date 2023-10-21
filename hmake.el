@@ -42,8 +42,18 @@ it encompasses."
         (push basic-name file-list)
         (puthash package-name file-list known-packages)))))
 
+;; The "package-table" object: make it easy to look up a list of
+;; files, given a package name.
 
+(cl-defstruct (package-table (:constructor package-table--create))
+  "A hash table mapping a package to the files it encompasses."
+  table)
 
+(defun package-table-create ()
+  (package-table--create :table (generate-package-table)))
+
+(cl-defmethod get-file-list ((this package-table) package-name)
+  (gethash package-name (package-table-table this)))
 
 (require 'ert)
 
@@ -57,3 +67,12 @@ it encompasses."
 (ert-deftest mapapp-in-package-application ()
   (should (equal (find-package-name (concat *java-project-package-root* "application/MapApp.java"))
                  "application")))
+
+(ert-deftest check-file-list ()
+  (let* ((table-obj (package-table-create))
+         (file-list (cddr (directory-files (concat *java-project-package-root* "gmapsfx/javascript/event"))))
+         (computed-file-list (get-file-list table-obj "gmapsfx.javascript.event")))
+    (should (equal (sort (mapcar #'file-name-base file-list)
+                         #'string<)
+                   (sort (mapcar #'file-name-base computed-file-list)
+                         #'string<)))))
