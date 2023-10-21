@@ -24,6 +24,9 @@ packages are under 'src'.")
 (rx-define java-line-comment
     (: "//" (* not-newline) eol))
 
+(rx-define java-identifier
+    (: (any alpha "_") (* (any alnum "_"))))
+
 ;;; The "package-table" object: make it easy to look up a list of
 ;;; files, given a package name.
 
@@ -50,8 +53,11 @@ corresponding file."
 
 (cl-defmethod find-dependencies ((this package-table) full-filename)
   (let* ((lines (get-program-lines full-filename))
+         ;; For inline package references. We're using a hash table
+         ;; here as a hash set, to avoid duplicates.
+         (mentions (make-hash-table :test #'equal))
          deps)
-    (dolist (line lines deps)
+    (dolist (line lines)
       (pcase line
         ((rx bos "import")
          (let* ((words (reverse (string-split line (rx (any " ;")) t)))
@@ -60,13 +66,17 @@ corresponding file."
            (if (string-match-p (rx "*" eos) package-unit)
                (nconc deps (get-file-list this package-name))
              (let ((file (lookup-file this package-unit)))
+               ;; Avoid 'nil' (for example, when dealing with
+               ;; something like 'java.util')
                (when (stringp file)
                  (push file deps))))))
         (_
          (dolist (package-name (get-packages this))
-               (let ((case-fold-search nil))
-                 (if (string-match (rx-to-string `(seq ,package-name ".")) line)
-                     (push line deps)))))))))
+           (let ((case-fold-search nil))
+             (if (string-match (rx-to-string `(seq ,package-name "." java-identifier)) line)
+                 (let ((package-unit (match-string-no-properties 0 line)))
+                   (puthash (lookup-file this package-unit) t mentions))))))))
+    (append (hash-table-keys mentions) deps)))
 
 ;;; The program itself ensues here.
 
@@ -162,3 +172,11 @@ stripped away comments."
                    large-example))
     ;; Verify that there are no empty strings in the set of lines.
     (should (cl-every (lambda (line) (not (string-empty-p line))) program-lines))))
+
+(ert-deftest test-dependencies-basic ()
+  "Test both 'import', and inlined dependencies.
+
+In this particular example, the first entry is an inline
+dependency; the rest are grabbed via 'import'."
+  (should (equal (find-dependencies (package-table-create) (concat *java-project-package-root* "application/MapApp.java"))
+                 '("geography/GeographicPoint.java" "gmapsfx/javascript/object/MapTypeIdEnum.java" "gmapsfx/javascript/object/MapOptions.java" "gmapsfx/javascript/object/LatLong.java" "gmapsfx/javascript/object/GoogleMap.java" "gmapsfx/MapComponentInitializedListener.java" "gmapsfx/GoogleMapView.java" "application/services/RouteService.java" "application/services/GeneralService.java" "application/controllers/RouteController.java" "application/controllers/FetchController.java"))))
