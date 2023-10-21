@@ -55,6 +55,9 @@ it encompasses."
 (cl-defmethod get-file-list ((this package-table) package-name)
   (gethash package-name (package-table-table this)))
 
+(cl-defmethod get-packages ((this package-table))
+  (hash-table-keys (package-table-table this)))
+
 (require 'ert)
 
 (ert-deftest fetch-package-files-for-roadgraph ()
@@ -76,3 +79,7 @@ it encompasses."
                          #'string<)
                    (sort (mapcar #'file-name-base computed-file-list)
                          #'string<)))))
+
+(ert-deftest test-number-of-packages-is-17 ()
+  (let ((table-obj (package-table-create)))
+    (should (eql 17 (length (get-packages table-obj))))))
