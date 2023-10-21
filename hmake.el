@@ -77,10 +77,9 @@ corresponding file."
                  (puthash file t mentions))))))
         (_
          (dolist (package-name (get-packages this))
-           (let ((case-fold-search nil))
-             (if (string-match (rx-to-string `(seq ,package-name "." java-identifier)) line)
-                 (let ((package-unit (match-string-no-properties 0 line)))
-                   (puthash (lookup-file this package-unit) t mentions))))))))
+           (if (string-match (rx-to-string `(seq ,package-name "." java-identifier)) line)
+               (let ((package-unit (match-string-no-properties 0 line)))
+                 (puthash (lookup-file this package-unit) t mentions)))))))
     (hash-table-keys mentions)))
 
 (cl-defmethod generate-dependency-graph ((this package-table))
