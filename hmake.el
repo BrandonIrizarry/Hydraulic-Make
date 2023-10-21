@@ -49,11 +49,20 @@ it encompasses."
                 (: "*" (not "/"))))
      (+ "*") "/"))
 
+(rx-define java-line-comment
+    (: "//" (* not-newline) eol))
+
 (defun get-program-lines (full-filename)
   (with-temp-buffer
     (insert-file full-filename)
-    (let ((content (replace-regexp-in-string (rx java-multi-line-comment) "" (buffer-string))))
-      (mapcar #'string-trim (string-split content "\n" t)))))
+    (let ((content (thread-last
+                     (buffer-string)
+                     (replace-regexp-in-string (rx java-multi-line-comment) "")
+                     (replace-regexp-in-string (rx java-line-comment) ""))))
+      (thread-last
+        (string-split content "\n" t)
+        (mapcar #'string-trim)
+        (seq-filter (lambda (line) (not (string-empty-p line))))))))
 
 ;; The "package-table" object: make it easy to look up a list of
 ;; files, given a package name.
@@ -97,6 +106,13 @@ it encompasses."
   (let ((table-obj (package-table-create)))
     (should (eql 17 (length (get-packages table-obj))))))
 
-(ert-deftest test-program-lines ()
+(ert-deftest test-program-lines-small-example ()
   (should (equal (get-program-lines "~/eclipse-workspace2/UCSDGraphs/src/gmapsfx/javascript/event/UIEventType.java")
-                 '("package gmapsfx.javascript.event;" "public enum UIEventType {" "" "click, dblclick, mousemove, mouseup, mousedown, mouseover, mouseout, rightclick;" "" "}"))))
+                 '("package gmapsfx.javascript.event;" "public enum UIEventType {" "click, dblclick, mousemove, mouseup, mousedown, mouseover, mouseout, rightclick;" "}"))))
+
+(ert-deftest test-program-lines-large-example ()
+  (let ((program-lines (get-program-lines "~/eclipse-workspace2/UCSDGraphs/src/basicgraph/GraphAdjList.java"))
+        (large-example '("package basicgraph;" "import java.util.ArrayList;" "import java.util.HashMap;" "import java.util.List;" "import java.util.Map;" "import java.util.Set;" "public class GraphAdjList extends Graph {" "private Map<Integer, ArrayList<Integer>> adjListsMap;" "public GraphAdjList () {" "adjListsMap = new HashMap<Integer, ArrayList<Integer>>();" "}" "public void implementAddVertex() {" "int nextIndex = getNumVertices();" "ArrayList<Integer> neighbors = new ArrayList<Integer>();" "adjListsMap.put(nextIndex,  neighbors);" "}" "public void implementAddEdge(int v, int w) {" "int numVertices = getNumVertices();" "if (v < 0 || w < 0 || v >= numVertices || w >= numVertices) {" "throw new IndexOutOfBoundsException();" "}" "ArrayList<Integer> neighbors = adjListsMap.get(v);" "if (neighbors == null) {" "neighbors = new ArrayList<Integer>();" "adjListsMap.put(v, neighbors);" "}" "neighbors.add(w);" "}" "public List<Integer> getNeighbors(int v) {" "return new ArrayList<Integer>(adjListsMap.get(v));" "}" "public List<Integer> getInNeighbors(int v) {" "List<Integer> inNeighbors = new ArrayList<Integer>();" "for (int u : adjListsMap.keySet()) {" "for (int w : adjListsMap.get(u)) {" "if (v == w) {" "inNeighbors.add(u);" "}" "}" "}" "return inNeighbors;" "}" "public List<Integer> getDistance2(int v) {" "List<Integer> reachable2 = new ArrayList<>();" "List<Integer> neighbors = getNeighbors(v);" "for (int i : neighbors) {" "reachable2.addAll(getNeighbors(i));" "}" "return reachable2;" "}" "public String adjacencyString() {" "String s = \"Adjacency list\";" "s += \" (size \" + getNumVertices() + \"+\" + getNumEdges() + \" integers):\";" "for (int v : adjListsMap.keySet()) {" "s += \"\\n\\t\"+v+\": \";" "for (int w : adjListsMap.get(v)) {" "s += w+\", \";" "}" "}" "return s;" "}" "}")))
+    (should (equal program-lines
+                   large-example))
+    (should (cl-every (lambda (line) (not (string-empty-p line))) program-lines))))
