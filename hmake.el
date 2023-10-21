@@ -132,6 +132,11 @@ corresponding file."
     (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";"))
     (match-string-no-properties 1)))
 
+(defun find-simple-filename (full-filename)
+  "Return the relative-path equivalent of the package that
+FULL-FILENAME belongs to."
+  (replace-regexp-in-string (rx-to-string `(seq bos ,*java-project-package-root*)) "" full-filename))
+
 (defun get-all-files ()
   (directory-files-recursively *java-project-package-root*
                                (rx bol (not (any ".#")) (* not-newline) ".java" eol)))
