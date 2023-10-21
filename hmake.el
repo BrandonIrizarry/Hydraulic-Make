@@ -55,7 +55,14 @@ corresponding file."
   (let* ((lines (get-program-lines full-filename))
          ;; For inline package references. We're using a hash table
          ;; here as a hash set, to avoid duplicates.
-         (mentions (make-hash-table :test #'equal)))
+         (mentions (make-hash-table :test #'equal))
+         ;; Here, we explicitly assume that the directory hierarchy
+         ;; and the package hierarchy are one and the same thing.
+         (local-identifiers (thread-last
+                              full-filename
+                              (find-package-name)
+                              (get-file-list this)
+                              (mapcar #'file-name-base))))
     (dolist (line lines)
       (pcase line
         ;; Skip the 'package' declaration, since these contain
