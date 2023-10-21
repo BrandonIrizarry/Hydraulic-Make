@@ -111,7 +111,7 @@ corresponding file."
   (let ((all-files (get-all-files))
         (graph (make-hash-table :test #'equal)))
     (dolist (file all-files graph)
-      (puthash file (find-dependencies this file) graph))))
+      (puthash (find-simple-filename file) (find-dependencies this file) graph))))
 
 (cl-defstruct (dependency-graph (:constructor dependency-graph--create))
               graph)
@@ -124,9 +124,9 @@ corresponding file."
     (maphash (lambda (k v) (push (cons k (list v)) result)) (dependency-graph-graph this))
     result))
 
-(cl-defmethod get-dependencies ((this dependency-graph) full-filename)
+(cl-defmethod get-dependencies ((this dependency-graph) simple-filename)
   (let ((table (dependency-graph-graph this)))
-    (gethash full-filename table)))
+    (gethash simple-filename table)))
 
 ;;; Some helper functions
 
