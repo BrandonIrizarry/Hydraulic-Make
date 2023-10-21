@@ -82,6 +82,23 @@ corresponding file."
                    (puthash (lookup-file this package-unit) t mentions))))))))
     (append (hash-table-keys mentions) deps)))
 
+(cl-defmethod generate-dependency-graph ((this package-table))
+  (let ((all-files (get-all-files))
+        (graph (make-hash-table :test #'equal)))
+    (dolist (file all-files graph)
+      (puthash file (find-dependencies this file) graph))))
+
+(cl-defstruct (dependency-graph (:constructor dependency-graph--create))
+              graph)
+
+(defun dependency-graph-create ()
+  (dependency-graph--create :graph (generate-dependency-graph (package-table-create))))
+
+(cl-defmethod to-assoc-list ((this dependency-graph))
+  (let (result)
+    (maphash (lambda (k v) (push (cons k (list v)) result)) graph)
+    result))
+
 ;;; Some helper functions
 
 (defun find-package-name (full-filename)
