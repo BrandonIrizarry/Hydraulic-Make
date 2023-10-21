@@ -1,7 +1,5 @@
 ;; -*- lexical-binding: t; -*-
 
-(require 'ert)
-
 (defvar *java-project-root*
   "~/eclipse-workspace2/UCSDGraphs/"
   "The top of the UCSDGraphs project hierarchy. Note that the actual
@@ -18,11 +16,6 @@ packages are under 'src'.")
     (goto-char (point-min))
     (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";"))
     (match-string-no-properties 1)))
-
-(ert-deftest mapapp-in-package-application ()
-  (should (equal (find-package-name (concat *java-project-package-root* "application/MapApp.java"))
-                 "application")))
-
 
 (defun get-all-files ()
   (directory-files-recursively *java-project-package-root*
@@ -51,9 +44,18 @@ it encompasses."
         (push basic-name file-list)
         (puthash package-name file-list known-packages)))))
 
+
+
+
+(require 'ert)
+
 (ert-deftest fetch-package-files-for-roadgraph ()
   (let ((files (mapcar (lambda (name) (format "roadgraph/%s.java" name))
                        '("AStarGrader" "CorrectAnswer" "DijkstraGrader" "MapGraph" "SearchGrader")))
         (package-table (generate-package-table)))
     (should (equal (sort (gethash "roadgraph" package-table) #'string<)
                    (sort files #'string<)))))
+
+(ert-deftest mapapp-in-package-application ()
+  (should (equal (find-package-name (concat *java-project-package-root* "application/MapApp.java"))
+                 "application")))
