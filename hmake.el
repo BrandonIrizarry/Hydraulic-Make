@@ -50,24 +50,23 @@ corresponding file."
 
 (cl-defmethod find-dependencies ((this package-table) full-filename)
   (let* ((lines (get-program-lines full-filename))
-         (raw-entries
-          (cl-loop for line in lines collect
-                (pcase line
-                  ((rx bos "import")
-                   (let* ((words (reverse (string-split line (rx (any " ;")) t)))
-                          (package-unit (car words))
-                          (package-name (extract-package-name-from-unit package-unit)))
-                     (if (string-match-p (rx "*" eos) package-unit)
-                         (get-file-list this package-name)
-                       (lookup-file this package-unit))))
-                  (_
-                   (cl-remove-if #'null (cl-loop for package-name in (get-packages this) collect
-                                              (let ((case-fold-search nil))
-                                                (if (string-match (rx-to-string `(seq ,package-name ".")) line)
-                                                    line)))))))))
-    ;; We've accumulated imports from e.g. java.util as well which
-    ;; show up as nils here: so get rid of them.
-    (cl-remove-if #'null raw-entries)))
+         deps)
+    (dolist (line lines deps)
+      (pcase line
+        ((rx bos "import")
+         (let* ((words (reverse (string-split line (rx (any " ;")) t)))
+                (package-unit (car words))
+                (package-name (extract-package-name-from-unit package-unit)))
+           (if (string-match-p (rx "*" eos) package-unit)
+               (nconc deps (get-file-list this package-name))
+             (let ((file (lookup-file this package-unit)))
+               (when (stringp file)
+                 (push file deps))))))
+        (_
+         (dolist (package-name (get-packages this))
+               (let ((case-fold-search nil))
+                 (if (string-match (rx-to-string `(seq ,package-name ".")) line)
+                     (push line deps)))))))))
 
 ;;; The program itself ensues here.
 
