@@ -17,15 +17,13 @@ packages are under 'src'.")
     (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";"))
     (match-string-no-properties 1)))
 
-(defun get-all-files ()
-  (directory-files-recursively *java-project-package-root*
-                               (rx bol (not (any ".#")) (* not-newline) ".java" eol)))
-
 (defun generate-package-table ()
   "Return a hash table mapping a package to the list of files
 it encompasses."
-  (let ((known-packages (make-hash-table :test #'equal)))
-    (dolist (file (get-all-files) known-packages)
+  (let ((known-packages (make-hash-table :test #'equal))
+        (all-files (directory-files-recursively *java-project-package-root*
+                                                (rx bol (not (any ".#")) (* not-newline) ".java" eol))))
+    (dolist (file all-files known-packages)
       (let* ((basic-name
               (progn
                 ;; Extract into BASIC-NAME the path that would
