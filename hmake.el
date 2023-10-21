@@ -59,7 +59,11 @@ corresponding file."
          deps)
     (dolist (line lines)
       (pcase line
-        ((rx bos "import")
+        ;; Skip the 'package' declaration, since these contain
+        ;; "dotted" statements which our default case would otherwise
+        ;; catch.
+        ((rx bos (* space) "package") nil)
+        ((rx bos (* space) "import")
          (let* ((words (reverse (string-split line (rx (any " ;")) t)))
                 (package-unit (car words))
                 (package-name (extract-package-name-from-unit package-unit)))
@@ -179,4 +183,7 @@ stripped away comments."
 In this particular example, the first entry is an inline
 dependency; the rest are grabbed via 'import'."
   (should (equal (find-dependencies (package-table-create) (concat *java-project-package-root* "application/MapApp.java"))
-                 '("geography/GeographicPoint.java" "gmapsfx/javascript/object/MapTypeIdEnum.java" "gmapsfx/javascript/object/MapOptions.java" "gmapsfx/javascript/object/LatLong.java" "gmapsfx/javascript/object/GoogleMap.java" "gmapsfx/MapComponentInitializedListener.java" "gmapsfx/GoogleMapView.java" "application/services/RouteService.java" "application/services/GeneralService.java" "application/controllers/RouteController.java" "application/controllers/FetchController.java"))))
+                 '("geography/GeographicPoint.java" "gmapsfx/javascript/object/MapTypeIdEnum.java" "gmapsfx/javascript/object/MapOptions.java" "gmapsfx/javascript/object/LatLong.java" "gmapsfx/javascript/object/GoogleMap.java" "gmapsfx/MapComponentInitializedListener.java" "gmapsfx/GoogleMapView.java" "application/services/RouteService.java" "application/services/GeneralService.java" "application/controllers/RouteController.java" "application/controllers/FetchController.java")))
+
+  (should (equal (find-dependencies (package-table-create) (concat *java-project-package-root* "application/services/GeneralService.java"))
+                 '("mapmaker/MapMaker.java" "gmapsfx/javascript/object/LatLongBounds.java" "gmapsfx/javascript/object/LatLong.java" "gmapsfx/javascript/object/GoogleMap.java" "gmapsfx/GoogleMapView.java" "application/SelectManager.java" "application/MarkerManager.java" "application/MapApp.java" "application/DataSet.java"))))
