@@ -40,6 +40,30 @@ packages are under 'src'.")
 (cl-defmethod get-packages ((this package-table))
   (hash-table-keys (package-table-table this)))
 
+(cl-defmethod lookup-file ((this package-table) package-unit)
+  "Given PACKAGE-UNIT (e.g. 'application.MapApp'), return the
+corresponding file."
+  (let* ((package-name (extract-package-name-from-unit package-unit))
+         (files (get-file-list this package-name))
+         (with-slashes (replace-regexp-in-string (rx ".") "/" package-unit)))
+    (cl-find (format "%s.java" with-slashes) files :test #'string=)))
+
+(cl-defmethod find-dependencies ((this package-table) full-filename)
+  (let* ((lines (get-program-lines full-filename))
+         (raw-entries
+          (cl-loop for line in lines collect
+                (pcase line
+                  ((rx bos "import")
+                   (let* ((words (reverse (string-split line (rx (any " ;")) t)))
+                          (package-unit (car words))
+                          (package-name (extract-package-name-from-unit package-unit)))
+                     (if (string-match-p (rx "*" eos) package-unit)
+                         (get-file-list this package-name)
+                       (lookup-file this package-unit))))))))
+    ;; We've accumulated imports from e.g. java.util as well which
+    ;; show up as nils here: so get rid of them.
+    (cl-remove-if #'null raw-entries)))
+
 ;;; The program itself ensues here.
 
 (defun find-package-name (full-filename)
@@ -90,6 +114,9 @@ stripped away comments."
         (seq-filter (lambda (line) (not (string-empty-p line))))))))
 
 ;;; Tests.
+
+(defun extract-package-name-from-unit (package-unit)
+  (mapconcat #'identity (butlast (string-split package-unit (rx ".") t)) "."))
 
 (require 'ert)
 
