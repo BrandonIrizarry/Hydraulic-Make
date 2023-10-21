@@ -38,7 +38,7 @@ it encompasses."
              (package-name (find-package-name file))
              (file-list (gethash package-name
                                  known-packages
-                                 ;; Theh default if PACKAGE-NAME
+                                 ;; The default if PACKAGE-NAME
                                  ;; hasn't been added yet
                                  (list))))
         (push basic-name file-list)
