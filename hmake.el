@@ -58,11 +58,10 @@ corresponding file."
          (mentions (make-hash-table :test #'equal))
          ;; Here, we explicitly assume that the directory hierarchy
          ;; and the package hierarchy are one and the same thing.
-         (local-identifiers (thread-last
+         (local-files (thread-last
                               full-filename
                               (find-package-name)
-                              (get-file-list this)
-                              (mapcar #'file-name-base))))
+                              (get-file-list this))))
     (dolist (line lines)
       (pcase line
         ;; Skip the 'package' declaration, since these contain
@@ -83,6 +82,19 @@ corresponding file."
                (when (stringp file)
                  (puthash file t mentions))))))
         (_
+
+         ;; Find local dependencies
+         (let ((live-local-files
+                (cl-remove-if-not (lambda (local-file)
+                                    (let ((local (file-name-base local-file)))
+                                      (when (string-match (rx-to-string `(seq (not (any alpha "_")) (group ,local) (not (any alnum "_"))))
+                                                          line)
+                                        (match-string-no-properties 1 line))))
+                                  local-files)))
+           (dolist (local-file live-local-files)
+             (puthash local-file t mentions)))
+
+         ;; Find inline dependencies
          (dolist (package-name (get-packages this))
            (if (string-match (rx-to-string `(seq ,package-name "." java-identifier)) line)
                (let ((package-unit (match-string-no-properties 0 line)))
