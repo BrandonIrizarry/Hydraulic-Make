@@ -100,6 +100,10 @@ corresponding file."
     (maphash (lambda (k v) (push (cons k (list v)) result)) (dependency-graph-graph this))
     result))
 
+(cl-defmethod get-dependencies ((this dependency-graph) full-filename)
+  (let ((table (dependency-graph-graph this)))
+    (gethash full-filename table)))
+
 ;;; Some helper functions
 
 (defun find-package-name (full-filename)
