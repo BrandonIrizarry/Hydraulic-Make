@@ -97,7 +97,7 @@ corresponding file."
 
 (cl-defmethod to-assoc-list ((this dependency-graph))
   (let (result)
-    (maphash (lambda (k v) (push (cons k (list v)) result)) graph)
+    (maphash (lambda (k v) (push (cons k (list v)) result)) (dependency-graph-graph this))
     result))
 
 ;;; Some helper functions
