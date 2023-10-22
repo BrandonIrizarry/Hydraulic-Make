@@ -209,17 +209,24 @@ stripped away comments."
          modified)
     (cl-labels ((search (parent-filename)
                   (let ((dependencies (get-dependencies graph parent-filename)))
-                    (dolist (dependency dependencies visited)
+                    (dolist (dependency dependencies modified)
                       (catch 'continue
                         (when (gethash dependency visited)
                           (throw 'continue nil))
                         (puthash dependency t visited)
-                        (when (file-newer-than-file-p dependency parent-filename)
+                        (when (file-newer-than-file-p (expand-simple-filename parent-filename)
+                                                      (find-class-file dependency))
                           (push dependency modified))
                         (search dependency))))))
       (puthash target-simple-filename t visited)
       (search target-simple-filename))))
 
+(defun generate-invocation (target)
+  (let* ((modified-dependencies (get-modified-dependencies target))
+         (full-filenames (cons (expand-simple-filename target)
+                               (mapcar #'expand-simple-filename modified-dependencies)))
+         (command (list "javac" "-cp" "lib/*" "-d" "bin")))
+    (append command full-filenames)))
 ;;; Tests.
 
 (defun extract-package-name-from-unit (package-unit)
