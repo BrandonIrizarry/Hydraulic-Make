@@ -185,6 +185,23 @@ stripped away comments."
         (mapcar #'string-trim)
         (seq-filter (lambda (line) (not (string-empty-p line))))))))
 
+(defun get-modified-dependencies (target-simple-filename)
+  (let* ((graph (dependency-graph-create))
+         (visited (make-hash-table :test #'equal))
+         modified)
+    (cl-labels ((search (parent-filename)
+                  (let ((dependencies (get-dependencies graph parent-filename)))
+                    (dolist (dependency dependencies visited)
+                      (catch 'continue
+                        (when (gethash dependency visited)
+                          (throw 'continue nil))
+                        (puthash dependency t visited)
+                        (when (file-newer-than-file-p dependency parent-filename)
+                          (push dependency modified))
+                        (search dependency))))))
+      (puthash target-simple-filename t visited)
+      (search target-simple-filename))))
+
 ;;; Tests.
 
 (defun extract-package-name-from-unit (package-unit)
