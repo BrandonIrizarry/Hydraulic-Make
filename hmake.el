@@ -225,8 +225,10 @@ stripped away comments."
   (let* ((modified-dependencies (get-modified-dependencies target))
          (full-filenames (cons (expand-simple-filename target)
                                (mapcar #'expand-simple-filename modified-dependencies)))
-         (command (list "javac" "-cp" "lib/*" "-d" "bin")))
-    (append command full-filenames)))
+         (command (list "javac" "-cp" "\"lib/*\"" "-d" "bin")))
+    (mapconcat #'identity
+               (append command full-filenames)
+               " ")))
 ;;; Tests.
 
 (defun extract-package-name-from-unit (package-unit)
