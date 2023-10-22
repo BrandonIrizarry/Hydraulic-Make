@@ -225,10 +225,27 @@ stripped away comments."
   (let* ((modified-dependencies (get-modified-dependencies target))
          (full-filenames (cons (expand-simple-filename target)
                                (mapcar #'expand-simple-filename modified-dependencies)))
-         (command (list "javac" "-cp" "\"lib/*\"" "-d" "bin")))
+         (command (list "javac" "-g" "-cp" "\"lib/*:bin\"" "-d" "bin")))
     (mapconcat #'identity
                (append command full-filenames)
                " ")))
+
+(defun eshell/setup-java-invocation (&rest args)
+  "Use an approach where the build and run commands are predefined
+by this setup command."
+  (let ((target (car args)))
+    (defun eshell/java-build ()
+      (eshell-kill-input)
+      (insert (generate-invocation target)))
+
+    (defun eshell/java-run ()
+      (eshell-kill-input)
+      (let ((package-unit-no-extension (thread-last
+                                         target
+                                         (replace-regexp-in-string (rx "/") ".")
+                                         (replace-regexp-in-string (rx ".java" eos) ""))))
+        (insert (format "java -cp \"lib/*:bin\" %s" package-unit-no-extension))))))
+
 ;;; Tests.
 
 (defun extract-package-name-from-unit (package-unit)
