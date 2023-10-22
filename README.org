@@ -1,0 +1,9 @@
+* Hydraulic Make
+** Copyright
+Copyright (C) 2001-2023 Brandon C. Irizarry.
+See the end of the file for license conditions.
+
+** License Conditions
+You should have received a copy of the GNU General Public License
+along with Hydraulic Make.  If not, see
+<https://www.gnu.org/licenses/>.
