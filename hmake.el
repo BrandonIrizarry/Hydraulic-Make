@@ -205,6 +205,8 @@ stripped away comments."
 
 (defun get-modified-dependencies (target-simple-filename)
   (let* ((graph (dependency-graph-create))
+         ;; Because of the potentially cyclic nature of Java
+         ;; dependency graphs, we must keep track of visited nodes.
          (visited (make-hash-table :test #'equal))
          modified)
     (cl-labels ((search (parent-filename)
