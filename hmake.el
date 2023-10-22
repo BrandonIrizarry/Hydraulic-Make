@@ -12,6 +12,15 @@ packages are under 'src'.")
   (concat *java-project-root* "src/")
   "The top of the UCSDGraphs package hierarchy.")
 
+(defvar *java-project-class-root*
+  (concat *java-project-root* "bin/")
+  "The top of the UCSDGraphs compiled (i.e., '.class') file
+hierarchy.
+
+This is the main ingredient needed for determining whether
+dependencies should be recompiled based on whether a given source
+target was modified.")
+
 ;;; RX definitions to help us strip comments from our working temp
 ;;; buffer.
 
@@ -146,6 +155,11 @@ FULL-FILENAME belongs to."
 (defun expand-simple-filename (simple-filename)
   "Expand the relative path format into a full path."
   (concat *java-project-package-root* simple-filename))
+
+(defun find-class-file (simple-filename)
+  "Find the .class file corresponding to SIMPLE-FILENAME."
+  (let ((partial-path (concat *java-project-class-root* simple-filename)))
+    (replace-regexp-in-string (rx ".java" eos) ".class" partial-path)))
 
 (defun get-all-files ()
   (directory-files-recursively *java-project-package-root*
