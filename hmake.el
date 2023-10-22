@@ -143,6 +143,10 @@ corresponding file."
 FULL-FILENAME belongs to."
   (replace-regexp-in-string (rx-to-string `(seq bos ,*java-project-package-root*)) "" full-filename))
 
+(defun expand-simple-filename (simple-filename)
+  "Expand the relative path format into a full path."
+  (concat *java-project-package-root* simple-filename))
+
 (defun get-all-files ()
   (directory-files-recursively *java-project-package-root*
                                (rx bol (not (any ".#")) (* not-newline) ".java" eol)))
