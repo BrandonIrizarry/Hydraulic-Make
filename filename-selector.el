@@ -21,14 +21,38 @@ Java source file:
 4. the fully-qualified package name (package-unit)"
   full simple class package)
 
-;; FIXME: add stripping.
+(rx-define java-multi-line-comment
+    (: "/*" (*
+             (| (not "*")
+                (: "*" (not "/"))))
+     (+ "*") "/"))
+
+(rx-define java-line-comment
+    (: "//" (* not-newline) eol))
+
+(rx-define java-identifier
+    (: (any alpha "_") (* (any alnum "_"))))
+
+(rx-define java-string
+    (: ?\" (*? anything) ?\"))
+
+(defun strip-non-code-artefacts ()
+  "Strip the current temporary buffer of non-code artefacts."
+  (when (string-match-p (rx bos " *temp*") (buffer-name))
+    (save-excursion
+      (replace-regexp (rx (or java-multi-line-comment
+                              java-line-comment
+                              java-string))
+                      ""))))
+
 (defun find-package-name (full-filename)
   "Return the package FULL-FILENAME belongs to, as a string."
   (with-temp-buffer
     (insert-file full-filename)
-    (goto-char (point-min))
+    (strip-non-code-artefacts)
     (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
-    (match-string-no-properties 1)))
+    (or (match-string-no-properties 1)
+        "default")))
 
 (defun filename-selector-create (full-filename)
   "Public constructor for FILENAME-SELECTOR objects."
@@ -49,63 +73,28 @@ associated with it."
                (butlast (string-split package-unit (rx ".")))
                ".")))
 
-;;; RX definitions to help us strip comments from our working temp
-;;; buffer.
-;;;
-;;; These are defined globally, to ease debugging.
-
-(rx-define java-multi-line-comment
-    (: "/*" (*
-             (| (not "*")
-                (: "*" (not "/"))))
-     (+ "*") "/"))
-
-(rx-define java-line-comment
-    (: "//" (* not-newline) eol))
-
-(rx-define java-identifier
-    (: (any alpha "_") (* (any alnum "_"))))
-
-(rx-define java-string
-    (: ?\" (* anything) ?\"))
-
 (cl-defmethod get-lines ((this filename-selector))
   "Return the (non-empty) lines of FULL-FILENAME, after first having
 stripped away comments."
   (with-temp-buffer
     (insert-file (filename-selector-full this))
-    (let ((content (thread-last
-                     (buffer-string)
-                     (replace-regexp-in-string (rx java-multi-line-comment) "")
-                     (replace-regexp-in-string (rx java-line-comment) "")
-                     (replace-regexp-in-string (rx java-string) ""))))
-      (thread-last
-        (string-split content "\n" t)
-        (mapcar #'string-trim)
-        (seq-filter (lambda (line) (not (string-empty-p line))))))))
+    (strip-non-code-artefacts)
+    (thread-last
+      (string-lines (buffer-string) t)
+      (mapcar #'string-trim)
+      (cl-remove-if #'string-empty-p))))
 
-;; FIXME: we should probably refactor "stripping" to its own method,
-;; and also do it for the package-finding code above
-;;
-;; FIXME: verify that glob expansion is really performed by the
-;; package-table object.
 (cl-defmethod find-imports ((this filename-selector))
   "Extract the contents of all import statements in THIS as a list
 of package units.
 
-Note that if the package unit is a glob, it remains unexpanded:
-glob expansion is the job of the PACKAGE-TABLE object."
+Note that if the package unit is a glob, it remains unexpanded."
   (with-temp-buffer
     (insert-file (filename-selector-full this))
-    (let ((content (thread-last
-                     (buffer-string)
-                     (replace-regexp-in-string (rx java-multi-line-comment) "")
-                     (replace-regexp-in-string (rx java-line-comment) "")
-                     (replace-regexp-in-string (rx java-string) ""))))
-      (goto-char (point-min))
-      (let (package-names)
-        (while (re-search-forward (rx "import" (+ space) (group (+ not-newline)) ";") nil t)
-          (push (match-string-no-properties 1) package-names))
-        package-names))))
+    (strip-non-code-artefacts)
+    (let (package-names)
+      (while (re-search-forward (rx "import" (+ space) (group (+ not-newline)) ";") nil t)
+        (push (match-string-no-properties 1) package-names))
+      package-names)))
 
 (provide 'filename-selector)
