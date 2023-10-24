@@ -30,12 +30,9 @@ Java source file:
     (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
     (match-string-no-properties 1)))
 
-;; FIXME: use 'string-remove-prefix'
 (defun filename-selector-create (full-filename)
   "Public constructor for FILENAME-SELECTOR objects."
-  (let* ((simple-filename (replace-regexp-in-string (rx-to-string `(seq bos ,*java-project-package-root*))
-                                                    ""
-                                                    full-filename))
+  (let* ((simple-filename (string-remove-prefix *java-project-package-root* full-filename))
          (class-filename (let ((partial-path (concat *java-project-class-root* simple-filename)))
                            (replace-regexp-in-string (rx ".java" eos) ".class" partial-path)))
          (package-unit (format "%s.%s"
