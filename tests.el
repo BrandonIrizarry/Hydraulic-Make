@@ -53,8 +53,13 @@
 let's see if our code correctly discovers the corresponding package."
     :tags '(filename-selector)
     (should (equal (find-imports filename-selector)
-                   '("gmapsfx.javascript.object.LatLong")))))
+                   '("gmapsfx.javascript.object.LatLong"))))
 
+  (ert-deftest basename-works ()
+    (should (equal (filename-selector-basename filename-selector)
+                   "CircleOptions"))))
+
+;; Second suite
 (let* ((full-filename "/home/demo/Java/DukeIntro/Course_2/parsing_weather_data/Weather.java")
        (filename-selector (filename-selector-create full-filename)))
 
@@ -64,4 +69,8 @@ let's see if our code correctly discovers the corresponding package."
 Note there is also no package declaration present."
     :tags '(filename-selector)
     (should (equal (sort (find-imports filename-selector) #'string<)
-                   '("edu.duke.*" "java.io.File" "org.apache.commons.csv.*")))))
+                   '("edu.duke.*" "java.io.File" "org.apache.commons.csv.*"))))
+
+  (ert-deftest belongs-to-default-package ()
+    "That is, it isn't marked as belonging to a package."
+    (should-not (filename-selector-package filename-selector))))

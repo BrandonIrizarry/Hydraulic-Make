@@ -12,14 +12,15 @@ top-level package directory.")
 are stored in a manner reflecting the package hierarchy.")
 
 (cl-defstruct (filename-selector (:constructor filename-selector--create))
-  "A record summarizing the four different formats of the name of a
+  "A record summarizing several different formats of the name of a
 Java source file:
 
 1. the full path (full)
 2. the relative path corresponding to the package name (simple)
 3. the full path to the corresponding class file (class)
-4. the fully-qualified package name (package-unit)"
-  full simple class package)
+4. the fully-qualified package name (package-unit)
+5. the basename: no path prefix, no filetype suffix (basename)"
+  full simple class package basename)
 
 (defun strip-non-code-artefacts ()
   "Strip the current temporary buffer of non-code artefacts."
@@ -45,18 +46,26 @@ Java source file:
     (insert-file full-filename)
     (strip-non-code-artefacts)
     (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
-    (or (match-string-no-properties 1)
-        "default")))
+    (match-string-no-properties 1)))
 
 (defun filename-selector-create (full-filename)
   "Public constructor for FILENAME-SELECTOR objects."
   (let* ((simple-filename (string-remove-prefix *java-project-package-root* full-filename))
          (class-filename (let ((partial-path (concat *java-project-class-root* simple-filename)))
                            (replace-regexp-in-string (rx ".java" eos) ".class" partial-path)))
-         (package-unit (format "%s.%s"
-                               (find-package-name full-filename)
-                               (file-name-base full-filename))))
-    (filename-selector--create :full full-filename :simple simple-filename :class class-filename :package package-unit)))
+         (basename (file-name-base full-filename))
+         (package-name (find-package-name full-filename))
+         package-unit)
+    (when package-name
+      (setq package-unit (format "%s.%s"
+                                 (find-package-name full-filename)
+                                 basename)))
+    (filename-selector--create
+     :full full-filename
+     :simple simple-filename
+     :class class-filename
+     :package package-unit
+     :basename basename)))
 
 (cl-defmethod get-package-prefix ((this filename-selector))
   "Given a FILENAME-SELECTOR object, return the package prefix
