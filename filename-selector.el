@@ -40,4 +40,13 @@ Java source file:
                                (file-name-base full-filename))))
     (filename-selector--create :full full-filename :simple simple-filename :class class-filename :package package-unit)))
 
+(cl-defmethod get-package-prefix ((this filename-selector))
+  "Given a FILENAME-SELECTOR object, return the package prefix
+associated with it."
+  (let ((package-unit (filename-selector-package this)))
+    ;; Weird, but works.
+    (mapconcat #'identity
+               (butlast (string-split package-unit (rx ".")))
+               ".")))
+
 (provide 'filename-selector)

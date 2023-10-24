@@ -31,4 +31,9 @@
     :tags '(filename-selector)
     (let ((package-unit "gmapsfx.shapes.CircleOptions"))
       (should (equal (filename-selector-package filename-selector)
-                     package-unit)))))
+                     package-unit))))
+
+  (ert-deftest get-package-prefix-works ()
+    :tags '(filename-selector)
+    (should (equal (get-package-prefix filename-selector)
+                   "gmapsfx.shapes"))))
