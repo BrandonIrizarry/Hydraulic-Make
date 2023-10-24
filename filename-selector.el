@@ -12,8 +12,8 @@ top-level package directory.")
 are stored in a manner reflecting the package hierarchy.")
 
 (cl-defstruct (filename-selector (:constructor filename-selector--create))
-  "A record summarizing the four different formats of the name
-of a Java source file:
+  "A record summarizing the four different formats of the name of a
+Java source file:
 
 1. the full path (full)
 2. the relative path corresponding to the package name (simple)
@@ -40,4 +40,4 @@ of a Java source file:
                                (file-name-base full-filename))))
     (filename-selector--create :full full-filename :simple simple-filename :class class-filename :package package-unit)))
 
-(provide 'filename-formats)
+(provide 'filename-selector)
