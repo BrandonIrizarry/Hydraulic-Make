@@ -36,4 +36,32 @@
   (ert-deftest get-package-prefix-works ()
     :tags '(filename-selector)
     (should (equal (get-package-prefix filename-selector)
-                   "gmapsfx.shapes"))))
+                   "gmapsfx.shapes")))
+
+  (ert-deftest demonstrate-get-lines ()
+    :tags '(filename-selector)
+    (let ((lines '("package gmapsfx.shapes;" "import gmapsfx.javascript.object.LatLong;" "public class CircleOptions extends FillableMapShapeOptions<CircleOptions> {" "private LatLong center;" "private double radius;" "public CircleOptions center(LatLong center) {" "setProperty(, radius);" "this.radius = radius;" "return this;" "}" "@Override" "protected CircleOptions getMe() {" "return this;" "}" "}")))
+      (cl-flet ((nonempty-string-p (str) (not (string-empty-p str)))
+                (quote-character-p (char) (eql char ?\")))
+        (should (equal (get-lines filename-selector)
+                       lines))
+        (should (cl-every #'nonempty-string-p lines))
+        (should (cl-notany #'quote-character-p lines )))))
+
+  (ert-deftest find-the-single-import ()
+    "The file used by this test suite has only one 'import' statement:
+let's see if our code correctly discovers the corresponding package."
+    :tags '(filename-selector)
+    (should (equal (find-imports filename-selector)
+                   '("gmapsfx.javascript.object.LatLong")))))
+
+(let* ((full-filename "/home/demo/Java/DukeIntro/Course_2/parsing_weather_data/Weather.java")
+       (filename-selector (filename-selector-create full-filename)))
+
+  (ert-deftest find-the-various-imports ()
+    "There are several import statements in this file.
+
+Note there is also no package declaration present."
+    :tags '(filename-selector)
+    (should (equal (find-imports filename-selector)
+                   '("edu.duke.*" "org.apache.commons.csv.*" "java.io.File")))))
