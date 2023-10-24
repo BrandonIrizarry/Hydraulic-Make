@@ -40,7 +40,7 @@
 
   (ert-deftest demonstrate-get-lines ()
     :tags '(filename-selector)
-    (let ((lines '("package gmapsfx.shapes;" "import gmapsfx.javascript.object.LatLong;" "public class CircleOptions extends FillableMapShapeOptions<CircleOptions> {" "private LatLong center;" "private double radius;" "public CircleOptions center(LatLong center) {" "setProperty(, radius);" "this.radius = radius;" "return this;" "}" "@Override" "protected CircleOptions getMe() {" "return this;" "}" "}")))
+    (let ((lines '("package gmapsfx.shapes;" "import gmapsfx.javascript.object.LatLong;" "public class CircleOptions extends FillableMapShapeOptions<CircleOptions> {" "private LatLong center;" "private double radius;" "public CircleOptions center(LatLong center) {" "setProperty(, center);" "this.center = center;" "return this;" "}" "public CircleOptions radius(double radius) {" "setProperty(, radius);" "this.radius = radius;" "return this;" "}" "@Override" "protected CircleOptions getMe() {" "return this;" "}" "}")))
       (cl-flet ((nonempty-string-p (str) (not (string-empty-p str)))
                 (quote-character-p (char) (eql char ?\")))
         (should (equal (get-lines filename-selector)
