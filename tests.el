@@ -63,5 +63,5 @@ let's see if our code correctly discovers the corresponding package."
 
 Note there is also no package declaration present."
     :tags '(filename-selector)
-    (should (equal (find-imports filename-selector)
-                   '("edu.duke.*" "org.apache.commons.csv.*" "java.io.File")))))
+    (should (equal (sort (find-imports filename-selector) #'string<)
+                   '("edu.duke.*" "java.io.File" "org.apache.commons.csv.*")))))
