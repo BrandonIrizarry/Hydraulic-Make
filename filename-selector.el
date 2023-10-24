@@ -21,29 +21,23 @@ Java source file:
 4. the fully-qualified package name (package-unit)"
   full simple class package)
 
-(rx-define java-multi-line-comment
-    (: "/*" (*
-             (| (not "*")
-                (: "*" (not "/"))))
-     (+ "*") "/"))
-
-(rx-define java-line-comment
-    (: "//" (* not-newline) eol))
-
-(rx-define java-identifier
-    (: (any alpha "_") (* (any alnum "_"))))
-
-(rx-define java-string
-    (: ?\" (*? anything) ?\"))
-
 (defun strip-non-code-artefacts ()
   "Strip the current temporary buffer of non-code artefacts."
   (when (string-match-p (rx bos " *temp*") (buffer-name))
     (save-excursion
-      (replace-regexp (rx (or java-multi-line-comment
-                              java-line-comment
-                              java-string))
-                      ""))))
+      (rx-let ((java-multi-line-comment
+                (: "/*" (*
+                         (| (not "*")
+                            (: "*" (not "/"))))
+                   (+ "*") "/"))
+               (java-line-comment
+                (: "//" (* not-newline) eol))
+               (java-string
+                (: ?\" (*? anything) ?\")))
+        (replace-regexp (rx (or java-multi-line-comment
+                                java-line-comment
+                                java-string))
+                        "")))))
 
 (defun find-package-name (full-filename)
   "Return the package FULL-FILENAME belongs to, as a string."
