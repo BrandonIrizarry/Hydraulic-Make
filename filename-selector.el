@@ -26,7 +26,7 @@ Java source file:
   (with-temp-buffer
     (insert-file full-filename)
     (goto-char (point-min))
-    (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";"))
+    (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
     (match-string-no-properties 1)))
 
 (defun filename-selector-create (full-filename)
