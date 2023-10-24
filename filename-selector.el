@@ -54,27 +54,23 @@ Java source file:
          (class-filename (let ((partial-path (concat *java-project-class-root* simple-filename)))
                            (replace-regexp-in-string (rx ".java" eos) ".class" partial-path)))
          (basename (file-name-base full-filename))
-         (package-name (find-package-name full-filename))
-         package-unit)
-    (when package-name
-      (setq package-unit (format "%s.%s"
-                                 (find-package-name full-filename)
-                                 basename)))
-    (filename-selector--create
-     :full full-filename
-     :simple simple-filename
-     :class class-filename
-     :package package-unit
-     :basename basename)))
+         (package-name (find-package-name full-filename)))
+    (let ((filename-selector (filename-selector--create
+                              :full full-filename
+                              :simple simple-filename
+                              :class class-filename
+                              :basename basename))
+          (package-unit (if package-name
+                            (format "%s.%s" package-name basename)
+                          basename)))
+      (setf (filename-selector-package filename-selector) package-unit)
+      filename-selector)))
 
 (cl-defmethod get-package-prefix ((this filename-selector))
   "Given a FILENAME-SELECTOR object, return the package prefix
 associated with it."
   (let ((package-unit (filename-selector-package this)))
-    ;; Weird, but works.
-    (mapconcat #'identity
-               (butlast (string-split package-unit (rx ".")))
-               ".")))
+    (string-join (butlast (string-split package-unit (rx "."))) ".")))
 
 (cl-defmethod get-lines ((this filename-selector))
   "Return the (non-empty) lines of FULL-FILENAME, after first having

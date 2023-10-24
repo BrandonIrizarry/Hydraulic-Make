@@ -73,4 +73,5 @@ Note there is also no package declaration present."
 
   (ert-deftest belongs-to-default-package ()
     "That is, it isn't marked as belonging to a package."
-    (should-not (filename-selector-package filename-selector))))
+    (should (equal (filename-selector-package filename-selector)
+                   "Weather"))))
