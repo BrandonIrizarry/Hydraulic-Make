@@ -49,4 +49,63 @@ associated with it."
                (butlast (string-split package-unit (rx ".")))
                ".")))
 
+;;; RX definitions to help us strip comments from our working temp
+;;; buffer.
+;;;
+;;; These are defined globally, to ease debugging.
+
+(rx-define java-multi-line-comment
+    (: "/*" (*
+             (| (not "*")
+                (: "*" (not "/"))))
+     (+ "*") "/"))
+
+(rx-define java-line-comment
+    (: "//" (* not-newline) eol))
+
+(rx-define java-identifier
+    (: (any alpha "_") (* (any alnum "_"))))
+
+(rx-define java-string
+    (: ?\" (* anything) ?\"))
+
+(cl-defmethod get-lines ((this filename-selector))
+  "Return the (non-empty) lines of FULL-FILENAME, after first having
+stripped away comments."
+  (with-temp-buffer
+    (insert-file (filename-selector-full this))
+    (let ((content (thread-last
+                     (buffer-string)
+                     (replace-regexp-in-string (rx java-multi-line-comment) "")
+                     (replace-regexp-in-string (rx java-line-comment) "")
+                     (replace-regexp-in-string (rx java-string) ""))))
+      (thread-last
+        (string-split content "\n" t)
+        (mapcar #'string-trim)
+        (seq-filter (lambda (line) (not (string-empty-p line))))))))
+
+;; FIXME: we should probably refactor "stripping" to its own method,
+;; and also do it for the package-finding code above
+;;
+;; FIXME: verify that glob expansion is really performed by the
+;; package-table object.
+(cl-defmethod find-imports ((this filename-selector))
+  "Extract the contents of all import statements in THIS as a list
+of package units.
+
+Note that if the package unit is a glob, it remains unexpanded:
+glob expansion is the job of the PACKAGE-TABLE object."
+  (with-temp-buffer
+    (insert-file (filename-selector-full this))
+    (let ((content (thread-last
+                     (buffer-string)
+                     (replace-regexp-in-string (rx java-multi-line-comment) "")
+                     (replace-regexp-in-string (rx java-line-comment) "")
+                     (replace-regexp-in-string (rx java-string) ""))))
+      (goto-char (point-min))
+      (let (package-names)
+        (while (re-search-forward (rx "import" (+ space) (group (+ not-newline)) ";") nil t)
+          (push (match-string-no-properties 1) package-names))
+        package-names))))
+
 (provide 'filename-selector)
