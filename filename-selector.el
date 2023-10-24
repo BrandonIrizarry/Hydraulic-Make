@@ -21,6 +21,7 @@ Java source file:
 4. the fully-qualified package name (package-unit)"
   full simple class package)
 
+;; FIXME: add stripping.
 (defun find-package-name (full-filename)
   "Return the package FULL-FILENAME belongs to, as a string."
   (with-temp-buffer
@@ -29,7 +30,9 @@ Java source file:
     (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
     (match-string-no-properties 1)))
 
+;; FIXME: use 'string-remove-prefix'
 (defun filename-selector-create (full-filename)
+  "Public constructor for FILENAME-SELECTOR objects."
   (let* ((simple-filename (replace-regexp-in-string (rx-to-string `(seq bos ,*java-project-package-root*))
                                                     ""
                                                     full-filename))
