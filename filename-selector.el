@@ -37,10 +37,10 @@ Java source file:
     (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
     (match-string-no-properties 1)))
 
-(defun create-project-environment (project-root)
+(defun create-project-environment (project-root package-subdir class-subdir)
   "Return the public constructor for FILENAME-SELECTOR objects."
-  (let ((package-root (concat project-root "src/"))
-        (class-root (concat project-root "bin/")))
+  (let ((package-root (concat project-root package-subdir))
+        (class-root (concat project-root class-subdir)))
     (lambda (full-filename)
       (let* ((simple-filename (string-remove-prefix package-root full-filename))
              (class-filename (let ((partial-path (concat class-root simple-filename)))
