@@ -30,28 +30,6 @@ to FILE-SELECTOR objects.")
 (cl-defmethod get-all-packages ((this package-table))
   (hash-table-keys (package-table-table this)))
 
-;;; Managing dependencies
-;;;
-;;; There are several kinds of dependencies (my terminology):
-;;;
-;;; 1. Explicit dependencies: ones made explicit by an 'import'
-;;; statement.
-;;;
-;;; 2. Inline dependencies: rather than having been imported, these
-;;; appear in the source as package units.
-;;;
-;;; 3. Local dependencies: objects that are members of the same
-;;; package. Since they enjoy package visibility, they appear in the
-;;; source without any qualification.
-;;;
-;;; #1 and #2 can be found in JAR files. Hence, they won't show up in
-;;; the filesystem. Either way, we need not worry about these
-;;; "missing" dependencies; it's the job of the program to figure that
-;;; stuff out.
-;;;
-;;; Another caveat is compiled inner classes. So when we look out for
-;;; class files, we have to cut out the '$...' between the name and
-;;; the '.class' file extension.
 (cl-defmethod find-dependencies ((this package-table) file)
   (let* ((lines (get-program-lines full-filename))
          ;; For inline package references. We're using a hash table
