@@ -2,12 +2,14 @@
 
 (require 'filename-selector)
 
-(defvar *java-project-all-files*
-  (mapcar #'filename-selector-create
-          (directory-files-recursively *java-project-package-root*
-                                       (rx bol (not (any ".#")) (* not-newline) ".java" eol)))
-  "A list of all source files in the current Java project, converted
-to FILE-SELECTOR objects.")
+(defun java-project-get-all-files (project-root)
+  "Return a list of all source files in the current Java project, converted
+to FILE-SELECTOR objects."
+  (cl-flet ((filename-selector-create (create-project-environment project-root)))
+    (mapcar #'filename-selector-create
+            (directory-files-recursively *java-project-package-root*
+                                         (rx bol (not (any ".#")) (* not-newline) ".java" eol)))))
+
 
 (cl-defstruct (package-table (:constructor package-table--create))
   "A hash table mapping a package prefix to the files it encompasses."
