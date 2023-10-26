@@ -31,7 +31,9 @@ You can think of this as a \"mass\" or \"group\" constructor for FILE-SELECTOR."
     (package-table--create :hash-table known-packages :assoc-table (map-pairs known-packages))))
 
 (cl-defmethod pretty-print ((this package-table))
-  )
+  (mapcar (pcase-lambda (`(,package-name . ,package-files))
+              (cons package-name (mapcar #'pretty-print package-files)))
+          (package-table-assoc-table this)))
 
 (cl-defmethod get-files ((this package-table) package-name)
   (gethash package-name (package-table-table this)))
