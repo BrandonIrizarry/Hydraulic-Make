@@ -29,11 +29,6 @@ to FILE-SELECTOR objects.")
 (cl-defmethod get-all-packages ((this package-table))
   (hash-table-keys (package-table-table this)))
 
-(cl-defmethod to-assoc-list ((this package-table))
-  (let (result)
-    (maphash (lambda (k v) (push (cons k (list v)) result)) (package-table-table this))
-    result))
-
 ;;; Managing dependencies
 ;;;
 ;;; There are several kinds of dependencies (my terminology):
