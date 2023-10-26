@@ -28,12 +28,7 @@ You can think of this as a \"mass\" or \"group\" constructor for FILE-SELECTOR."
         ;; Add the current project file under the corresponding
         ;; package prefix.
         (puthash package-prefix (cons source-file (gv-deref files)) known-packages)))
-    ;; Now KNOWN-PACKAGES is completely defined: but before finalizing
-    ;; the object, we need to create the assoc-table.
-    (let ((assoc-table
-           (cl-loop for package-name being the hash-keys of known-packages using (hash-values package-members)
-                 collect (cons package-name (list package-members)))))
-      (package-table--create :hash-table known-packages :assoc-table assoc-table))))
+    (package-table--create :hash-table known-packages :assoc-table (map-pairs known-packages))))
 
 (cl-defmethod pretty-print ((this package-table))
   )
