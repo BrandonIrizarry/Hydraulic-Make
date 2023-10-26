@@ -2,7 +2,7 @@
 
 (require 'filename-selector)
 
-(defun java-project-get-all-files (project-root)
+(defun java-project-get-source-files (project-root)
   "Return a list of all source files in the current Java project, converted
 to FILE-SELECTOR objects."
   (cl-flet ((filename-selector-create (create-project-environment project-root)))
@@ -17,10 +17,10 @@ to FILE-SELECTOR objects."
 
 (defun package-table-create (project-root)
   "The public constructor for PACKAGE-TABLE objects."
-  (let ((all-files (java-project-get-all-files project-root))
+  (let ((source-files (java-project-get-source-files project-root))
         (known-packages (make-hash-table :test #'equal)))
-    (dolist (file all-files known-packages)
-      (let* ((package-prefix (get-package-prefix file))
+    (dolist (source-file source-files known-packages)
+      (let* ((package-prefix (get-package-prefix source-file))
              ;; Get the reference to the list of files under this
              ;; prefix, to make adding to it less verbose.
              (files (gv-ref (gethash package-prefix known-packages (list)))))
