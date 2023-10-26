@@ -60,7 +60,12 @@ let's see if our code correctly discovers the corresponding package."
   (ert-deftest basename-works ()
     :tags '(filename-selector)
     (should (equal (filename-selector-basename filename-selector)
-                   "CircleOptions"))))
+                   "CircleOptions")))
+
+  (ert-deftest pretty-print-works ()
+    :tags '(filename-selector)
+    (should (equal (pretty-print filename-selector)
+                   "gmapsfx/shapes/CircleOptions.java"))))
 
 ;; Second suite
 (let* ((filename-selector-create (create-project-environment "~/Java/DukeIntro/Course_2/parsing_weather_data/"))
