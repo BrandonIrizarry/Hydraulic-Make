@@ -15,13 +15,14 @@ to FILE-SELECTOR objects.")
 
 (defun package-table-create ()
   "The public constructor for PACKAGE-TABLE objects."
-  (cl-flet ((generate-package-table ()
-              (let ((known-packages (make-hash-table :test #'equal)))
-                (dolist (file *java-project-all-files* known-packages)
-                  (let* ((package-prefix (get-package-prefix file))
-                         (files (gv-ref (gethash package-prefix known-packages (list)))))
-                    (puthash package-prefix (cons file (gv-deref files)) known-packages))))))
-    (package-table--create :table (generate-package-table))))
+  (let ((known-packages (make-hash-table :test #'equal)))
+    (dolist (file *java-project-all-files* known-packages)
+      (let* ((package-prefix (get-package-prefix file))
+             (files (gv-ref (gethash package-prefix known-packages (list)))))
+        ;; Add the current project file under the corresponding
+        ;; package prefix.
+        (puthash package-prefix (cons file (gv-deref files)) known-packages))))
+  (package-table--create :table (generate-package-table)))
 
 (cl-defmethod get-files ((this package-table) package-name)
   (gethash package-name (package-table-table this)))
