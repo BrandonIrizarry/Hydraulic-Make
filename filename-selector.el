@@ -88,4 +88,7 @@ Note that if the package unit is a glob, it remains unexpanded."
         (push (match-string-no-properties 1) package-names))
       package-names)))
 
+(cl-defmethod pretty-print ((this filename-selector))
+  (filename-selector-simple this))
+
 (provide 'filename-selector)
