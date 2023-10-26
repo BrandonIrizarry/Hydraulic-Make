@@ -4,8 +4,10 @@
 
 (require 'filename-selector)
 
-(let* ((full-filename "~/eclipse-workspace2/UCSDGraphs/src/gmapsfx/shapes/CircleOptions.java")
-       (filename-selector (filename-selector-create full-filename)))
+;; First suite
+(let* ((filename-selector-create (create-project-environment "~/eclipse-workspace2/UCSDGraphs/"))
+       (full-filename "~/eclipse-workspace2/UCSDGraphs/src/gmapsfx/shapes/CircleOptions.java")
+       (filename-selector (funcall filename-selector-create full-filename)))
 
   (ert-deftest full-selector-works ()
     :tags '(filename-selector)
@@ -60,8 +62,9 @@ let's see if our code correctly discovers the corresponding package."
                    "CircleOptions"))))
 
 ;; Second suite
-(let* ((full-filename "/home/demo/Java/DukeIntro/Course_2/parsing_weather_data/Weather.java")
-       (filename-selector (filename-selector-create full-filename)))
+(let* ((filename-selector-create (create-project-environment "~/Java/DukeIntro/Course_2/parsing_weather_data/"))
+       (full-filename "/home/demo/Java/DukeIntro/Course_2/parsing_weather_data/Weather.java")
+       (filename-selector (funcall filename-selector-create full-filename)))
 
   (ert-deftest find-the-various-imports ()
     "There are several import statements in this file.
