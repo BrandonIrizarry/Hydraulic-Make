@@ -10,10 +10,9 @@ to FILE-SELECTOR objects."
             (directory-files-recursively *java-project-package-root*
                                          (rx bol (not (any ".#")) (* not-newline) ".java" eol)))))
 
-
 (cl-defstruct (package-table (:constructor package-table--create))
   "A hash table mapping a package prefix to the files it encompasses."
-  table)
+  hash-table assoc-table)
 
 (defun package-table-create (project-root)
   "The public constructor for PACKAGE-TABLE objects."
@@ -26,8 +25,16 @@ to FILE-SELECTOR objects."
              (files (gv-ref (gethash package-prefix known-packages (list)))))
         ;; Add the current project file under the corresponding
         ;; package prefix.
-        (puthash package-prefix (cons file (gv-deref files)) known-packages))))
-  (package-table--create :table (generate-package-table)))
+        (puthash package-prefix (cons source-file (gv-deref files)) known-packages)))
+    ;; Now KNOWN-PACKAGES is completely defined: but before finalizing
+    ;; the object, we need to create the assoc-table.
+    (let ((assoc-table
+           (cl-loop for package-name being the hash-keys of known-packages using (hash-values package-members)
+                 collect (cons package-name (list package-members)))))
+      (package-table--create :hash-table known-packages :assoc-table assoc-table))))
+
+(cl-defmethod pretty-print ((this package-table))
+  )
 
 (cl-defmethod get-files ((this package-table) package-name)
   (gethash package-name (package-table-table this)))
