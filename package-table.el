@@ -4,8 +4,10 @@
 
 (defun java-project-get-source-files (project-root)
   "Return a list of all source files in the current Java project, converted
-to FILE-SELECTOR objects."
-  (cl-flet ((filename-selector-create (create-project-environment project-root)))
+to FILE-SELECTOR objects.
+
+You can think of this as a \"mass\" or \"group\" constructor for FILE-SELECTOR."
+  (cl-flet ((filename-selector-create (create-project-environment project-root package-subdir class-subdir)))
     (mapcar #'filename-selector-create
             (directory-files-recursively *java-project-package-root*
                                          (rx bol (not (any ".#")) (* not-newline) ".java" eol)))))
