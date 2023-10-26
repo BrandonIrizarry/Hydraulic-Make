@@ -15,11 +15,14 @@ to FILE-SELECTOR objects."
   "A hash table mapping a package prefix to the files it encompasses."
   table)
 
-(defun package-table-create ()
+(defun package-table-create (project-root)
   "The public constructor for PACKAGE-TABLE objects."
-  (let ((known-packages (make-hash-table :test #'equal)))
-    (dolist (file *java-project-all-files* known-packages)
+  (let ((all-files (java-project-get-all-files project-root))
+        (known-packages (make-hash-table :test #'equal)))
+    (dolist (file all-files known-packages)
       (let* ((package-prefix (get-package-prefix file))
+             ;; Get the reference to the list of files under this
+             ;; prefix, to make adding to it less verbose.
              (files (gv-ref (gethash package-prefix known-packages (list)))))
         ;; Add the current project file under the corresponding
         ;; package prefix.
