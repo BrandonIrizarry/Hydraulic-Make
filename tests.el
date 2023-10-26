@@ -58,6 +58,7 @@ let's see if our code correctly discovers the corresponding package."
                    '("gmapsfx.javascript.object.LatLong"))))
 
   (ert-deftest basename-works ()
+    :tags '(filename-selector)
     (should (equal (filename-selector-basename filename-selector)
                    "CircleOptions"))))
 
