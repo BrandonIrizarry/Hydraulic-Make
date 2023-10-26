@@ -43,7 +43,15 @@ to FILE-SELECTOR objects.")
 ;;; 3. Local dependencies: objects that are members of the same
 ;;; package. Since they enjoy package visibility, they appear in the
 ;;; source without any qualification.
-
+;;;
+;;; #1 and #2 can be found in JAR files. Hence, they won't show up in
+;;; the filesystem. Either way, we need not worry about these
+;;; "missing" dependencies; it's the job of the program to figure that
+;;; stuff out.
+;;;
+;;; Another caveat is compiled inner classes. So when we look out for
+;;; class files, we have to cut out the '$...' between the name and
+;;; the '.class' file extension.
 (cl-defmethod find-dependencies ((this package-table) file)
   (let* ((lines (get-program-lines full-filename))
          ;; For inline package references. We're using a hash table
