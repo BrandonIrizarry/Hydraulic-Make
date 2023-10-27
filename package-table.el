@@ -46,7 +46,33 @@ objects) that belong to it."
   "Return a list of all package prefixes (strings) in PACKAGE-TABLE."
   (hash-table-keys (package-table-hash-table this)))
 
-(cl-defmethod find-dependencies ((this package-table) file)
+(cl-defmethod find-inline-dependencies ((this-pt package-table) (this-fs filename-selector))
+  (with-temp-buffer
+    (insert-file (filename-selector-full this-fs))
+    (strip-non-code-artefacts)
+    (rx-let ((java-identifier (: (any alpha "_") (* (any alnum "_"))))
+             ;; This is the one we'll be using. It'll match object
+             ;; fields and methods, but it'll also match package uses.
+             (java-compound-identifier (: (group (* java-identifier ".")) java-identifier)))
+      (let ((mentions (make-hash-table :test #'equal)))
+        (while (re-search-forward (rx java-compound-identifier) nil t)
+          (let ((prefix (thread-last
+                          (match-string-no-properties 1)
+                          (string-remove-suffix ".")))
+                (terminal (match-string-no-properties 2)))
+            (when-let ((package-files (get-files this-pt prefix)))
+              package-files)))))))
+
+(defun main ()
+  "A mock main function to test the current state of the
+application."'
+  (let ((ptable (package-table-create "~/eclipse-workspace2/UCSDGraphs/" "src/" "bin/"))
+        (filename-selector-create (create-project-environment "~/eclipse-workspace2/UCSDGraphs/src/application/MapApp.java" "src/" "bin/")))
+    (find-inline-dependencies ptable (funcall filename-selector-create "~/eclipse-workspace2/UCSDGraphs/src/application/MapApp.java"))))
+
+;;; Obsolete code follows
+
+(cl-defmethod find-dependencies ((this package-table) filename-selector)
   (let* ((lines (get-program-lines full-filename))
          ;; For inline package references. We're using a hash table
          ;; here as a hash set, to avoid duplicates.
