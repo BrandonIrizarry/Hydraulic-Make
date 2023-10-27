@@ -38,8 +38,9 @@ where the assoc values are also pretty-printed."
           (package-table-assoc-table this)))
 
 (cl-defmethod get-files ((this package-table) package-prefix)
-  "Given PACKAGE-PREFIX, get the list of files that belong to it."
-  (gethash package-prefix (package-table-table this)))
+  "Given PACKAGE-PREFIX, get the list of files (as file-selector
+objects) that belong to it."
+  (gethash package-prefix (package-table-hash-table this)))
 
 (cl-defmethod get-all-packages ((this package-table))
   "Return a list of all package prefixes in PACKAGE-TABLE."
