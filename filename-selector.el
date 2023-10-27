@@ -89,6 +89,8 @@ Note that if the package unit is a glob, it remains unexpanded."
       package-names)))
 
 (cl-defmethod pretty-print ((this filename-selector))
+  "Pretty-print the filename-selector object using its \"simple\"
+filename."
   (filename-selector-simple this))
 
 (provide 'filename-selector)
