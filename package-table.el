@@ -43,8 +43,8 @@ objects) that belong to it."
   (gethash package-prefix (package-table-hash-table this)))
 
 (cl-defmethod get-all-packages ((this package-table))
-  "Return a list of all package prefixes in PACKAGE-TABLE."
-  (hash-table-keys (package-table-table this)))
+  "Return a list of all package prefixes (strings) in PACKAGE-TABLE."
+  (hash-table-keys (package-table-hash-table this)))
 
 (cl-defmethod find-dependencies ((this package-table) file)
   (let* ((lines (get-program-lines full-filename))
