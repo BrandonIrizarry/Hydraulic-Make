@@ -21,8 +21,7 @@
     (package-table--create :hash-table known-packages :assoc-table (map-pairs known-packages))))
 
 (cl-defmethod pretty-print ((this package-table))
-  "Pretty-print the package-table object using its assoc-table,
-where the assoc values are also pretty-printed."
+  "Pretty-print PACKAGE-TABLE."
   (mapcar (pcase-lambda (`(,package-name . ,package-files))
               (cons package-name (mapcar #'pretty-print package-files)))
           (package-table-assoc-table this)))
@@ -33,7 +32,7 @@ objects) that belong to it."
   (gethash package-prefix (package-table-hash-table this)))
 
 (cl-defmethod get-all-packages ((this package-table))
-  "Return a list of all package prefixes (strings) in PACKAGE-TABLE."
+  "Return a list of all packages."
   (hash-table-keys (package-table-hash-table this)))
 
 (cl-defmethod find-inline-dependencies ((this-pt package-table) (this-fs filename-selector))

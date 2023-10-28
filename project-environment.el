@@ -3,8 +3,19 @@
 (require 'utils)
 
 (cl-defstruct (project-environment (:constructor project-environment--create))
-  "A project environment defined by a root directory, a package
-subdirectory, and a class-file subdirectory."
+  "A struct containing directory information about a project, along
+with all its source files.
+
+PROJECT-ROOT: the top-level directory.
+
+PACKAGE-ROOT: the top-level package directory (for example,
+PROJECT-ROOT/src).
+
+CLASS-ROOT: the top-level class-file directory (for example,
+PROJECT-ROOT/bin).
+
+FILES: the list of files belonging to the project, as full-path
+strings."
   project-root package-root class-root files)
 
 (defun project-environment-create (project-root package-subdir class-subdir)
@@ -17,7 +28,11 @@ subdirectory, and a class-file subdirectory."
 
 
 (cl-defmethod get-package ((this project-environment) package-path)
-  "Return the package FULL-FILENAME belongs to, as a string."
+  "Return the package PACKAGE-PATH belongs to, as a string.
+
+For example, if PACKAGE-PATH is
+gmapsfx/shapes/CircleOptions.java, this method returns
+\"gmapsfx.shapes\"."
   (with-temp-buffer
     (insert-file (get-file this package-path :type 'full))
     (strip-non-code-artefacts)
