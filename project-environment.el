@@ -1,49 +1,41 @@
 ;; -*- lexical-binding: t; -*-
 
-(let ((load-path (cons (expand-file-name ".") load-path)))
-  (require 'filename-selector))
+(require 'utils)
 
 (cl-defstruct (project-environment (:constructor project-environment--create))
   "A project environment defined by a root directory, a package
-subdirectory, and a class-file subdirectory.
-
-FILENAME-SELECTOR-CREATE is the constructor function for filename
-selector objects used by the current Java project."
-  project-root package-subdir class-subdir fs-create)
+subdirectory, and a class-file subdirectory."
+  project-root package-root class-root files)
 
 (defun project-environment-create (project-root package-subdir class-subdir)
   "The public constructor for PROJECT-ENVIRONMENT objects."
-  (let ((penv (project-environment--create :project-root project-root
-                                           :package-subdir package-subdir
-                                           :class-subdir class-subdir)))
-    ;; Define the filename-selector constructor
-    (let* ((package-root (concat project-root package-subdir))
-           (class-root (concat project-root class-subdir)))
-      (setf (penv :fs-create)
-            (lambda (full-filename)
-              (let* ((simple-filename (string-remove-prefix package-root full-filename))
-                     (class-filename (let ((partial-path (concat class-root simple-filename)))
-                                       (replace-regexp-in-string (rx ".java" eos) ".class" partial-path)))
-                     (basename (file-name-base full-filename))
-                     (package-name (find-package-name full-filename)))
-                (let ((filename-selector (filename-selector--create
-                                          :full full-filename
-                                          :simple simple-filename
-                                          :class class-filename
-                                          :basename basename))
-                      (package-unit (if package-name
-                                        (format "%s.%s" package-name basename)
-                                      basename)))
-                  (setf (filename-selector-package filename-selector) package-unit)
-                  filename-selector))))
-      ;; Return the project-environment object
-      penv)))
+  (project-environment--create :project-root project-root
+                               :package-root (concat project-root package-subdir)
+                               :class-root (concat project-root class-subdir)
+                               :files (directory-files-recursively (concat project-root package-subdir)
+                                                                   (rx bol (not (any ".#")) (* not-newline) ".java" eol))))
 
-(cl-defmethod get-source-files ((this project-environment))
-  "Return a list of all source files in the current Java project, converted
-to FILE-SELECTOR objects."
-  (cl-flet ((file-selector-create (project-environment-fs-create this)))
-    (mapcar #'file-selector-create
-            (directory-files-recursively (concat project-root package-subdir)
-                                         (rx bol (not (any ".#")) (* not-newline) ".java" eol)))))
+
+(cl-defmethod get-package ((this project-environment) package-path)
+  "Return the package FULL-FILENAME belongs to, as a string."
+  (with-temp-buffer
+    (insert-file (get-file this package-path :type 'full))
+    (strip-non-code-artefacts)
+    (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
+    (match-string-no-properties 1)))
+
+(cl-defmethod get-file ((this project-environment) package-path &key type)
+  "Get a filename equivalent to PACKAGE-PATH, selecting the format
+using the keyword argument TYPE."
+  (pcase type
+    ('full (concat (project-environment-package-root this)
+                   package-path))
+    ('class (concat (project-environment-class-root this)
+                    (replace-regexp-in-string "\\.java\\'" ".class"
+                                              package-path)))
+    ('package (concat (get-package this package-path)
+                      "."
+                      (file-name-base package-path)))
+    ('basename (file-name-base package-path))))
+
 (provide 'project-environment)

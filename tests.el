@@ -2,71 +2,35 @@
 
 ;;; TESTS FOR 'FILENAME-SELECTOR.EL'
 
-(let ((load-path (cons (expand-file-name ".") load-path)))
-  (require 'project-environment))
+(require 'project-environment)
 
-;; First suite
-(let* ((penv (project-environment-create "~/eclipse-workspace2/UCSDGraphs/" "src/" "bin/"))
-       (full-filename "~/eclipse-workspace2/UCSDGraphs/src/gmapsfx/shapes/CircleOptions.java")
-       (filename-selector (funcall (project-environment-fs-create penv) full-filename)))
+(let* ((project-root "~/eclipse-workspace2/UCSDGraphs/")
+       (package-root "~/eclipse-workspace2/UCSDGraphs/src/")
+       (class-root "~/eclipse-workspace2/UCSDGraphs/bin/")
+       (example-file "gmapsfx/shapes/CircleOptions.java")
+       (example-class "gmapsfx/shapes/CircleOptions.class")
+       (example-package-unit "gmapsfx.shapes.CircleOptions")
+       (penv (project-environment-create project-root "src/" "bin/")))
 
-  (ert-deftest full-selector-works ()
-    :tags '(filename-selector)
-    (should (equal (filename-selector-full filename-selector)
-                   full-filename)))
+  (ert-deftest get-full-filename ()
+    (should (equal (get-file penv example-file :type 'full)
+                   (concat package-root example-file))))
 
-  (ert-deftest simple-selector-works ()
-    :tags '(filename-selector)
-    (let ((simple-filename "gmapsfx/shapes/CircleOptions.java"))
-      (should (equal (filename-selector-simple filename-selector)
-                     simple-filename))))
+  (ert-deftest get-path-to-class-file ()
+    (should (equal (get-file penv example-file :type 'class)
+                   (concat class-root example-class))))
 
-  (ert-deftest class-selector-works ()
-    :tags '(filename-selector)
-    (let ((class-filename (thread-last
-                            full-filename
-                            (replace-regexp-in-string "src" "bin")
-                            (replace-regexp-in-string "\\.java\\'" ".class"))))
-      (should (equal (filename-selector-class filename-selector)
-                     class-filename))))
+  (ert-deftest get-package-unit ()
+    (should (equal (get-file penv example-file :type 'package)
+                   "gmapsfx.shapes.CircleOptions")))
 
-  (ert-deftest package-selector-works ()
-    :tags '(filename-selector)
-    (let ((package-unit "gmapsfx.shapes.CircleOptions"))
-      (should (equal (filename-selector-package filename-selector)
-                     package-unit))))
-
-  (ert-deftest get-package-prefix-works ()
-    :tags '(filename-selector)
-    (should (equal (get-package-prefix filename-selector)
+  (ert-deftest get-package ()
+    (should (equal (get-package penv example-file)
                    "gmapsfx.shapes")))
 
-  (ert-deftest demonstrate-get-lines ()
-    :tags '(filename-selector)
-    (let ((lines '("package gmapsfx.shapes;" "import gmapsfx.javascript.object.LatLong;" "public class CircleOptions extends FillableMapShapeOptions<CircleOptions> {" "private LatLong center;" "private double radius;" "public CircleOptions center(LatLong center) {" "setProperty(, center);" "this.center = center;" "return this;" "}" "public CircleOptions radius(double radius) {" "setProperty(, radius);" "this.radius = radius;" "return this;" "}" "@Override" "protected CircleOptions getMe() {" "return this;" "}" "}")))
-      (cl-flet ((nonempty-string-p (str) (not (string-empty-p str)))
-                (quote-character-p (char) (eql char ?\")))
-        (should (equal (get-lines filename-selector)
-                       lines))
-        (should (cl-every #'nonempty-string-p lines))
-        (should (cl-notany #'quote-character-p lines )))))
-
-  (ert-deftest find-the-single-import ()
-    "The file used by this test suite has only one 'import' statement:
-let's see if our code correctly discovers the corresponding package."
-    :tags '(filename-selector)
-    (should (equal (find-imports filename-selector)
-                   '("gmapsfx.javascript.object.LatLong"))))
-
-  (ert-deftest basename-works ()
-    :tags '(filename-selector)
-    (should (equal (filename-selector-basename filename-selector)
-                   "CircleOptions")))
-
-  (ert-deftest pretty-print-works ()
-    :tags '(filename-selector)
-    (should (equal (pretty-print filename-selector)
-                   "gmapsfx/shapes/CircleOptions.java"))))
+  (ert-deftest get-basename ()
+    (should (equal (get-file penv example-file :type 'basename)
+                   "CircleOptions"))))
 
 ;; Second suite
 (let* ((filename-selector-create (create-project-environment "~/Java/DukeIntro/Course_2/parsing_weather_data/"))
