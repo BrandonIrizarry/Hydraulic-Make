@@ -2,7 +2,8 @@
 
 ;;; TESTS FOR 'FILENAME-SELECTOR.EL'
 
-(require 'project-environment)
+(add-to-list 'load-path (expand-file-name ".") t)
+(require 'package-table)
 
 (let* ((project-root "~/eclipse-workspace2/UCSDGraphs/")
        (package-root "~/eclipse-workspace2/UCSDGraphs/src/")
