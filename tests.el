@@ -79,3 +79,10 @@ the empty string."
     :tags '(duke)
     (should (equal (list-deps penv "Main.java")
                    '("MarkovWordTwo" "IMarkovModel")))))
+
+(let ((penv (project-environment-create "~/Java/FakeProject/" "src/" "bin/")))
+  (ert-deftest conference-deps ()
+    "Examine the dependencies of 'conference/Conference.java'."
+    :tags '(me)
+    (should (equal (list-deps penv "conference/Conference.java")
+                   '("andalucia.Malaga" "andalucia.Sevilla")))))
