@@ -20,11 +20,14 @@ strings."
 
 (defun project-environment-create (project-root package-subdir class-subdir)
   "The public constructor for PROJECT-ENVIRONMENT objects."
-  (project-environment--create :project-root project-root
-                               :package-root (concat project-root package-subdir)
-                               :class-root (concat project-root class-subdir)
-                               :files (directory-files-recursively (concat project-root package-subdir)
-                                                                   (rx bol (not (any ".#")) (* not-newline) ".java" eol))))
+  (let ((package-root (concat project-root package-subdir)))
+    (project-environment--create :project-root project-root
+                                 :package-root package-root
+                                 :class-root (concat project-root class-subdir)
+                                 :files (mapcar (lambda (filename)
+                                                  (string-remove-prefix package-root filename))
+                                                (directory-files-recursively package-root
+                                                                             (rx bol (not (any ".#")) (* not-newline) ".java" eol))))))
 
 
 (cl-defmethod get-package ((this project-environment) package-path)
