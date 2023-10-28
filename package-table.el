@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
-(require 'filename-selector)
+(require 'project-environment)
 
 (cl-defstruct (package-table (:constructor package-table--create))
   "A hash table mapping a package prefix to the files it encompasses."
@@ -21,12 +21,12 @@
               (cons package-name package-files))
           (map-pairs (package-table-table this))))
 
-(cl-defmethod get-files ((this package-table) package-prefix)
-  "Given PACKAGE-PREFIX, get the list of files (as file-selector
-objects) that belong to it."
-  (gethash package-prefix (package-table-hash-table this)))
+(cl-defmethod get-files ((this package-table) package)
+  "Return the list of files under PACKAGE."
+  (gethash package (package-table-table this)))
 
 (cl-defmethod get-all-packages ((this package-table))
   "Return a list of all packages."
   (hash-table-keys (package-table-hash-table this)))
 
+(provide 'package-table)
