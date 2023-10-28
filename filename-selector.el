@@ -37,27 +37,6 @@ Java source file:
     (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
     (match-string-no-properties 1)))
 
-(defun create-project-environment (project-root package-subdir class-subdir)
-  "Return the public constructor for FILENAME-SELECTOR objects."
-  (let ((package-root (concat project-root package-subdir))
-        (class-root (concat project-root class-subdir)))
-    (lambda (full-filename)
-      (let* ((simple-filename (string-remove-prefix package-root full-filename))
-             (class-filename (let ((partial-path (concat class-root simple-filename)))
-                               (replace-regexp-in-string (rx ".java" eos) ".class" partial-path)))
-             (basename (file-name-base full-filename))
-             (package-name (find-package-name full-filename)))
-        (let ((filename-selector (filename-selector--create
-                                  :full full-filename
-                                  :simple simple-filename
-                                  :class class-filename
-                                  :basename basename))
-              (package-unit (if package-name
-                                (format "%s.%s" package-name basename)
-                              basename)))
-          (setf (filename-selector-package filename-selector) package-unit)
-          filename-selector)))))
-
 (cl-defmethod get-package-prefix ((this filename-selector))
   "Given a FILENAME-SELECTOR object, return the package prefix
 associated with it."

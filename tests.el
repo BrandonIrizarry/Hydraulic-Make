@@ -2,12 +2,13 @@
 
 ;;; TESTS FOR 'FILENAME-SELECTOR.EL'
 
-(require 'filename-selector)
+(let ((load-path (cons (expand-file-name ".") load-path)))
+  (require 'project-environment))
 
 ;; First suite
-(let* ((filename-selector-create (create-project-environment "~/eclipse-workspace2/UCSDGraphs/"))
+(let* ((penv (project-environment-create "~/eclipse-workspace2/UCSDGraphs/" "src/" "bin/"))
        (full-filename "~/eclipse-workspace2/UCSDGraphs/src/gmapsfx/shapes/CircleOptions.java")
-       (filename-selector (funcall filename-selector-create full-filename)))
+       (filename-selector (funcall (project-environment-fs-create penv) full-filename)))
 
   (ert-deftest full-selector-works ()
     :tags '(filename-selector)
