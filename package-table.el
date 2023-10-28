@@ -35,4 +35,23 @@
   "Return a list of all packages."
   (hash-table-keys (package-table-hash-table this)))
 
+(cl-defmethod find-inline-dependencies ((this package-table) package-path)
+  (with-temp-buffer
+    (insert-file (get-file this package-path :type 'full))
+    (strip-non-code-artefacts)
+    (rx-let ((java-identifier (: (any alpha "_") (* (any alnum "_"))))
+             ;; The following is the one we'll be using. It'll match
+             ;; object fields and methods, but it'll also match
+             ;; package uses.
+             (java-compound-identifier (: (group (* java-identifier ".")) (group java-identifier))))
+      (let ((mentions (make-hash-table :test #'equal)))
+        (while (re-search-forward (rx java-compound-identifier) nil t)
+          (let ((prefix (string-remove-suffix "." (match-string-no-properties 1)))
+                (terminal (match-string-no-properties 2)))
+            ;; If the identifier scores a list of files, we have a
+            ;; package on our hands
+            (when-let ((package-files (get-files this prefix)))
+              (puthash prefix t mentions))))
+        mentions))))
+
 (provide 'package-table)

@@ -31,3 +31,19 @@
   (ert-deftest get-basename ()
     (should (equal (get-file penv example-file :type 'basename)
                    "CircleOptions"))))
+
+(ert-deftest mapapp-deps ()
+  "A mock main function to test the current state of the
+application."
+  :tags '(main)
+  (add-to-list 'load-path (expand-file-name ".") t)
+  (require 'package-table)
+
+  (let* ((penv (project-environment-create "~/eclipse-workspace2/UCSDGraphs/" "src/" "bin/"))
+         (ptable (package-table-create penv)))
+    (should (equal (map-pairs (find-inline-dependencies ptable "application/MapApp.java"))
+                   '(("application.controllers" . t)
+                     ("application.services" . t)
+                     ("gmapsfx" . t)
+                     ("gmapsfx.javascript.object" . t)
+                     ("geography" . t))))))
