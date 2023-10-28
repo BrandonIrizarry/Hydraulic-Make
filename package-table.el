@@ -35,7 +35,11 @@
   "Return a list of all packages."
   (hash-table-keys (package-table-hash-table this)))
 
-(cl-defmethod find-inline-dependencies ((this package-table) package-path)
+(cl-defmethod package-p ((this package-table) package)
+  "Check whether PACKAGE is one of the project's packages."
+  (gethash package (package-table-table this)))
+
+(cl-defmethod find-dependencies ((this package-table) package-path)
   (with-temp-buffer
     (insert-file (get-file this package-path :type 'full))
     (strip-non-code-artefacts)
@@ -44,14 +48,29 @@
              ;; object fields and methods, but it'll also match
              ;; package uses.
              (java-compound-identifier (: (group (* java-identifier ".")) (group java-identifier))))
-      (let ((mentions (make-hash-table :test #'equal)))
+      ;; A hash table is used to avoid duplicates.
+      (let* ((mentions (make-hash-table :test #'equal))
+             (parent-package (get-package (package-table-penv this) package-path))
+             (local-files (remove (file-name-base package-path)
+                                  (mapcar #'file-name-base (get-files this parent-package)))))
         (while (re-search-forward (rx java-compound-identifier) nil t)
-          (let ((prefix (string-remove-suffix "." (match-string-no-properties 1)))
-                (terminal (match-string-no-properties 2)))
-            ;; If the identifier scores a list of files, we have a
-            ;; package on our hands
-            (when-let ((package-files (get-files this prefix)))
-              (puthash prefix t mentions))))
+          (let* ((identifier (match-string-no-properties 0))
+                 (prefix (string-remove-suffix "." (match-string-no-properties 1)))
+                 (terminal (match-string-no-properties 2)))
+            (if (package-p this prefix)
+                (puthash identifier t mentions)
+              (if (string-empty-p prefix)
+                  (if (member identifier local-files)
+                      (puthash identifier t mentions)
+                    (when (and (equal parent-package "default")
+                               (member identifier (get-files this "default")))
+                      (puthash identifier t mentions)))))))
         mentions))))
+
+(cl-defmethod list-deps ((this project-environment) package-path)
+  "Return the list of dependencies of PACKAGE-PATH, given a project
+environment."
+  (let* ((ptable (package-table-create this)))
+    (hash-table-keys (find-dependencies ptable package-path))))
 
 (provide 'package-table)
