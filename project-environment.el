@@ -40,7 +40,8 @@ gmapsfx/shapes/CircleOptions.java, this method returns
     (insert-file (get-file this package-path :type 'full))
     (strip-non-code-artefacts)
     (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
-    (match-string-no-properties 1)))
+    (or (match-string-no-properties 1)
+        "default")))
 
 (cl-defmethod get-file ((this project-environment) package-path &key type)
   "Get a filename equivalent to PACKAGE-PATH, selecting the format
