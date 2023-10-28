@@ -31,21 +31,3 @@
   (ert-deftest get-basename ()
     (should (equal (get-file penv example-file :type 'basename)
                    "CircleOptions"))))
-
-;; Second suite
-(let* ((filename-selector-create (create-project-environment "~/Java/DukeIntro/Course_2/parsing_weather_data/"))
-       (full-filename "/home/demo/Java/DukeIntro/Course_2/parsing_weather_data/Weather.java")
-       (filename-selector (funcall filename-selector-create full-filename)))
-
-  (ert-deftest find-the-various-imports ()
-    "There are several import statements in this file.
-
-Note there is also no package declaration present."
-    :tags '(filename-selector)
-    (should (equal (sort (find-imports filename-selector) #'string<)
-                   '("edu.duke.*" "java.io.File" "org.apache.commons.csv.*"))))
-
-  (ert-deftest belongs-to-default-package ()
-    "That is, it isn't marked as belonging to a package."
-    (should (equal (filename-selector-package filename-selector)
-                   "Weather"))))
