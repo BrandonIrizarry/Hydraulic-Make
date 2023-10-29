@@ -85,4 +85,4 @@ the empty string."
     "Examine the dependencies of 'conference/Conference.java'."
     :tags '(me)
     (should (equal (list-deps penv "conference/Conference.java")
-                   '("andalucia.Malaga" "andalucia.Sevilla")))))
+                   '("asturias.Cangas" "asturias.Gijon" "andalucia.Malaga" "andalucia.Sevilla")))))
