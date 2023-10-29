@@ -83,17 +83,22 @@
               (when (equal identifier "package")
                 (throw 'continue nil))
 
-              ;; Not an import statement.
+              ;; Since this check doesn't depend on 'prefix' or
+              ;; 'terminal' (see below), putting it here may let us
+              ;; simplify what follows.
+              (when (and (equal parent-package "default")
+                         (member identifier (get-files this "default")))
+                (puthash identifier t mentions)
+                (throw 'continue nil))
+
+              ;; Whatever else, will fall through to here.
               (let ((prefix (string-remove-suffix "." (match-string-no-properties 1)))
                     (terminal (match-string-no-properties 2)))
-                (if (package-p this prefix)
-                    (puthash identifier t mentions)
-                  (if (string-empty-p prefix)
-                      (if (member identifier local-files)
-                          (puthash identifier t mentions)
-                        (when (and (equal parent-package "default")
-                                   (member identifier (get-files this "default")))
-                          (puthash identifier t mentions)))))))))
+                (cond ((package-p this prefix)
+                       (puthash identifier t mentions))
+                      ((and (string-empty-p prefix)
+                            (member identifier local-files))
+                       (puthash identifier t mentions)))))))
         mentions))))
 
 (cl-defmethod list-deps ((this project-environment) package-path)
