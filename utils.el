@@ -18,4 +18,11 @@
                                 java-string))
                         "")))))
 
+(defun get-current-line ()
+  "Return the line POINT is on in the current temporary buffer."
+  (string-trim (buffer-substring-no-properties (line-beginning-position)
+                                               (line-end-position))))
+
+(defun find-char-in-current-line (char)
+  "")
 (provide 'utils)
