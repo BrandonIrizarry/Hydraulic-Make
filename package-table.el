@@ -60,8 +60,7 @@
           (catch 'continue
             (let ((identifier (match-string-no-properties 0)))
 
-              ;; Import statements have to be handled separately,
-              ;; since they can contain globs that need expansion.
+              ;; Check import statements for globs.
               (when (and (equal identifier "import")
                          (string-match-p "\\.\\*;\\'"
                                          (get-current-line)))
