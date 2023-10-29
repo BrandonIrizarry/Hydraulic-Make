@@ -55,6 +55,8 @@
              (local-files (remove (file-name-base package-path)
                                   (mapcar #'file-name-base (get-files this parent-package)))))
         (while (re-search-forward (rx java-compound-identifier) nil t)
+          ;; Strangely, this is beneath the while-test, yet the
+          ;; while-test still executes!
           (catch 'continue
             (let ((identifier (match-string-no-properties 0)))
 
