@@ -56,19 +56,21 @@
         (while (re-search-forward (rx java-compound-identifier) nil t)
           (catch 'continue
             (let ((identifier (match-string-no-properties 0)))
-              (if (equal identifier "import")
-                  (let* ((import-statement (get-current-line))
-                         (has-asterisk-p (string-match-p "\\.\\*;\\'" import-statement)))
-                    (if has-asterisk-p
-                        (let ((package (progn (re-search-forward (rx java-compound-identifier)
-                                                                 (line-end-position))
-                                              (match-string-no-properties 0))))
-                          (dolist (file (get-files this package))
-                            (puthash (get-file (package-table-penv this) file :type 'package)
-                                     t
-                                     mentions))
-                          (goto-char (line-end-position))
-                          (throw 'continue nil)))))
+              ;; Import statements have to be handled separately,
+              ;; since they can contain globs that need expansion.
+              (when (and (equal identifier "import")
+                         (string-match-p "\\.\\*;\\'"
+                                         (get-current-line)))
+                (let ((package (progn (re-search-forward (rx java-compound-identifier)
+                                                         (line-end-position))
+                                      (match-string-no-properties 0))))
+                  (dolist (file (get-files this package))
+                    (puthash (get-file (package-table-penv this) file :type 'package)
+                             t
+                             mentions))
+                  (goto-char (line-end-position))
+                  (throw 'continue nil)))
+              ;; Not an import statement.
               (let ((prefix (string-remove-suffix "." (match-string-no-properties 1)))
                     (terminal (match-string-no-properties 2)))
                 (if (package-p this prefix)
