@@ -74,7 +74,12 @@
                   (goto-char (line-end-position))
                   (throw 'continue nil)))
 
-              ;; We may as well skip 'package', to simplify debugging.
+              ;; If a non-glob import, we still may as well skip the
+              ;; word "import" itself (simplifies debugging).
+              (when (equal identifier "import")
+                (throw 'continue nil))
+
+              ;; Similarly, skip "package".
               (when (equal identifier "package")
                 (throw 'continue nil))
 
