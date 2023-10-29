@@ -40,6 +40,7 @@
   (gethash package (package-table-table this)))
 
 (cl-defmethod find-dependencies ((this package-table) package-path)
+  "Find and return hash-set of dependencies of PACKAGE-PATH."
   (with-temp-buffer
     (insert-file (get-file this package-path :type 'full))
     (strip-non-code-artefacts)
@@ -56,6 +57,7 @@
         (while (re-search-forward (rx java-compound-identifier) nil t)
           (catch 'continue
             (let ((identifier (match-string-no-properties 0)))
+
               ;; Import statements have to be handled separately,
               ;; since they can contain globs that need expansion.
               (when (and (equal identifier "import")
@@ -70,6 +72,11 @@
                              mentions))
                   (goto-char (line-end-position))
                   (throw 'continue nil)))
+
+              ;; We may as well skip 'package', to simplify debugging.
+              (when (equal identifier "package")
+                (throw 'continue nil))
+
               ;; Not an import statement.
               (let ((prefix (string-remove-suffix "." (match-string-no-properties 1)))
                     (terminal (match-string-no-properties 2)))
