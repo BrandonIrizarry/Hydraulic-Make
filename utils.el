@@ -24,6 +24,4 @@
   (string-trim (buffer-substring-no-properties (line-beginning-position)
                                                (line-end-position))))
 
-(defun find-char-in-current-line (char)
-  "")
 (provide 'utils)
