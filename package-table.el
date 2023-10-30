@@ -107,4 +107,16 @@ environment."
   (let* ((ptable (package-table-create this)))
     (hash-table-keys (find-dependencies ptable package-path))))
 
+;; Graph prototype
+
+(cl-defstruct (dependency-graph (:constructor dependency-graph--create))
+              graph)
+
+(cl-defmethod dependency-graph-create ((penv project-environment))
+  (let ((graph (make-hash-table :test #'equal)))
+    (dolist (package-path (project-environment-files penv) graph)
+      (puthash package-path (list-deps penv package-path) graph))
+    (dependency-graph--create :graph graph)))
+
+
 (provide 'package-table)
