@@ -1,6 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 
+(defvar ucsd-root "~/eclipse-workspace2/UCSDGraphs/")
 
-(defun main (project-root src bin)
-  (let* ((penv (project-environment-create project-root src bin)))
-    (map-pairs (dependency-graph-graph (dependency-graph-create penv)))))
+(cl-defmethod main ((penv project-environment) entry-point)
+  (get-modified-dependencies penv entry-point))
+
+
+(main (project-environment-create ucsd-root "src/" "bin/")
+      "application/MapApp.java")

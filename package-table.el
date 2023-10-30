@@ -118,5 +118,26 @@ environment."
       (puthash package-path (list-deps penv package-path) graph))
     (dependency-graph--create :graph graph)))
 
+(cl-defmethod get-dependencies ((this dependency-graph) package-path)
+  (let ((graph (dependency-graph-graph this)))
+    (gethash package-path graph)))
+
+(cl-defmethod get-modified-dependencies ((penv project-environment) package-path)
+  (let* ((graph (dependency-graph-create penv))
+         ;; Because of the potentially cyclic nature of Java
+         ;; dependency graphs, we must keep track of visited nodes.
+         (visited (make-hash-table :test #'equal))
+         modified)
+    (cl-labels ((search (dependencies)
+                  ;; DEP refers to the current recompilation candidate.
+                  (dolist (dep dependencies modified)
+                    (unless (gethash dep visited)
+                      (puthash dep t visited)
+                      (when (file-newer-than-file-p (get-file penv dep :type 'full)
+                                                    (get-file penv dep :type 'class))
+                        (push dep modified))
+                      (search (get-dependencies graph dep))))))
+      (search (cons package-path (get-dependencies graph package-path))))
+    (map-pairs modified)))
 
 (provide 'package-table)
