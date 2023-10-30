@@ -16,19 +16,29 @@ PROJECT-ROOT/bin).
 
 FILES: the list of files belonging to the project, as full-path
 strings."
-  project-root package-root class-root files)
+  project-root package-root class-root files file-to-package-alist)
 
 (defun project-environment-create (project-root package-subdir class-subdir)
   "The public constructor for PROJECT-ENVIRONMENT objects."
-  (let ((package-root (concat project-root package-subdir)))
-    (project-environment--create :project-root project-root
-                                 :package-root package-root
-                                 :class-root (concat project-root class-subdir)
-                                 :files (mapcar (lambda (filename)
-                                                  (string-remove-prefix package-root filename))
-                                                (directory-files-recursively package-root
-                                                                             (rx bol (not (any ".#")) (* not-newline) ".java" eol))))))
-
+  (let* ((package-root (concat project-root package-subdir))
+         (penv (project-environment--create
+                :project-root project-root
+                :package-root package-root
+                :class-root (concat project-root class-subdir)))
+         file-to-package-alist)
+    (setf (project-environment-files penv)
+          (mapcar (lambda (filename)
+                    (let ((package-path (string-remove-prefix package-root filename)))
+                      (push (cons package-path  (format "%s.%s"
+                                                        (get-package penv package-path)
+                                                        (file-name-base package-path)))
+                            file-to-package-alist)
+                      package-path))
+                  (directory-files-recursively package-root
+                                               (rx bol (not (any ".#")) (* not-newline) ".java" eol))))
+    (setf (project-environment-file-to-package-alist penv)
+          file-to-package-alist)
+    penv))
 
 (cl-defmethod get-package ((this project-environment) package-path)
   "Return the package PACKAGE-PATH belongs to, as a string.
