@@ -13,10 +13,11 @@
                 (: "//" (* not-newline) eol))
                (java-string
                 (: ?\" (*? anything) ?\")))
-        (replace-regexp (rx (or java-multi-line-comment
-                                java-line-comment
-                                java-string))
-                        "")))))
+        (while (re-search-forward (rx (or java-multi-line-comment
+                                          java-line-comment
+                                          java-string))
+                                  nil t)
+          (replace-match ""))))))
 
 (defun get-current-line ()
   "Return the line POINT is on in the current temporary buffer."
