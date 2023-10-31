@@ -116,7 +116,10 @@ environment."
 (cl-defmethod dependency-graph-create ((penv project-environment))
   (let ((graph (make-hash-table :test #'equal)))
     (dolist (package-path (project-environment-files penv) graph)
-      (puthash package-path (list-deps penv package-path) graph))
+      (let ((file-deps (mapcar (lambda (pkg-dep)
+                           (car (rassoc pkg-dep (project-environment-file-to-package-alist penv))))
+                         (list-deps penv package-path))))
+        (puthash package-path file-deps graph)))
     (dependency-graph--create :graph graph)))
 
 (cl-defmethod get-dependencies ((this dependency-graph) package-path)
