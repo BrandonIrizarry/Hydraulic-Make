@@ -79,8 +79,9 @@
               (when (equal identifier "import")
                 (throw 'continue nil))
 
-              ;; Similarly, skip "package".
+              ;; Similarly, skip package statement.
               (when (equal identifier "package")
+                (goto-char (line-end-position))
                 (throw 'continue nil))
 
               ;; Since this check doesn't depend on 'prefix' or
