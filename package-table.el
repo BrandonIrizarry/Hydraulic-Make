@@ -154,14 +154,17 @@ environment."
 ;; Eshell integration.
 
 (cl-defmethod generate-invocation ((penv project-environment) target)
-  (let* ((modified-dependencies (get-modified-dependencies penv target))
-         (full-filenames (mapcar (lambda (moddep)
-                                   (get-file penv moddep :type 'full))
-                                 modified-dependencies))
-         (command (list "javac" "-g" "-cp" "\"lib/*:bin\"" "-d" "bin")))
-    (mapconcat #'identity
-               (append command full-filenames)
-               " ")))
+  (catch 'done
+    (let* ((modified-dependencies (get-modified-dependencies penv target))
+           (full-filenames (mapcar (lambda (moddep)
+                                     (get-file penv moddep :type 'full))
+                                   modified-dependencies)))
+      (unless full-filenames
+        (throw 'done
+          (user-error "Nothing to build.")))
+
+      (let ((command (list "javac" "-g" "-cp" "\"lib/*:bin\"" "-d" "bin")))
+        (mapconcat #'identity (append command full-filenames) " ")))))
 
 (defun eshell/setup-java-invocation (project-root package-subdir class-subdir)
   "Use an approach where the build and run commands are predefined
