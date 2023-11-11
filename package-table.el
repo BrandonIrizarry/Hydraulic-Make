@@ -211,7 +211,7 @@ by this setup command."
                                            target
                                            (replace-regexp-in-string (rx "/") ".")
                                            (replace-regexp-in-string (rx ".java" eos) ""))))
-          (insert (format "java -cp \"lib/*:bin\" %s" package-unit-no-extension))))
+          (insert (format "java -cp \"lib/*:%s\" %s" class-subdir package-unit-no-extension))))
 
 
       ;; Generate the build command (or else insert the run command.)
