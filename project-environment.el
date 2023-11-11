@@ -24,12 +24,11 @@ strings."
          (penv (project-environment--create
                 :project-root project-root
                 :package-root package-root
-                :class-root (concat project-root class-subdir))))
+                :class-root (concat project-root class-subdir)))
+         (fullpaths (directory-files-recursively package-root
+                                                 (rx bol (not (any ".#")) (* not-newline) ".java" eol))))
     (setf (project-environment-files penv)
-          (mapcar (lambda (fullpath)
-                    (string-remove-prefix package-root fullpath))
-                  (directory-files-recursively package-root
-                                               (rx bol (not (any ".#")) (* not-newline) ".java" eol))))
+          (cl-loop for fullpath in fullpaths collect (string-remove-prefix package-root fullpath)))
     penv))
 
 (cl-defmethod get-package ((this project-environment) package-path)
