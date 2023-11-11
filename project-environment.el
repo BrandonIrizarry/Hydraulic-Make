@@ -31,7 +31,12 @@ associated files (alist)."
          (fullpaths (directory-files-recursively package-root
                                                  (rx bol (not (any ".#")) (* not-newline) ".java" eol))))
     (setf (project-environment-files penv)
-          (cl-loop for fullpath in fullpaths collect (string-remove-prefix package-root fullpath)))
+          (cl-loop for fullpath in fullpaths collect
+                (let ((package-path (string-remove-prefix package-root fullpath)))
+                  ;; Use GET-PACKAGE call to make sure all files are
+                  ;; cached beforehand
+                  (get-package penv package-path)
+                  package-path)))
     penv))
 
 (cl-defmethod get-package ((this project-environment) package-path)
