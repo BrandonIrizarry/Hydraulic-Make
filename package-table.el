@@ -99,7 +99,7 @@
                        (puthash identifier t mentions))
                       ((and (string-empty-p prefix)
                             (member identifier local-files))
-                       (puthash identifier t mentions)))))))
+                       (puthash (concat parent-package "." identifier) t mentions)))))))
         mentions))))
 
 (cl-defmethod list-deps ((this project-environment) package-path)
