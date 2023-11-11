@@ -105,7 +105,7 @@ the empty string."
 
 ;; Dependency graph.
 (efs-use-fixtures create-dep-graph (ht-ucsd-defs)
-  :tags '(ucsd)
+  :tags '(ucsd edebug)
   (dependency-graph-create penv))
 
 
