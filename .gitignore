@@ -1,2 +1,4 @@
 /.emacs-backups/
 /notes.org
+*.org
+!README.org
