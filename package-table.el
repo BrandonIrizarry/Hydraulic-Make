@@ -49,7 +49,8 @@
              ;; object fields and methods, but it'll also match
              ;; package uses.
              (java-compound-identifier (: (group (* java-identifier ".")) (group java-identifier))))
-      ;; A hash table is used to avoid duplicates.
+      ;; MENTIONS is our return value. It's defined as a hash table,
+      ;; to avoid duplicates.
       (let* ((mentions (make-hash-table :test #'equal))
              (parent-package (get-package (package-table-penv this) package-path))
              (local-files (remove (file-name-base package-path)
