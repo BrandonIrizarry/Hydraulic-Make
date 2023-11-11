@@ -148,8 +148,14 @@ environment."
                       (puthash dep t visited)
                       (add-to-modified-when-changed dep)
                       (search (get-dependencies graph dep))))))
-      (add-to-modified-when-changed package-path)
-      (search (get-dependencies graph package-path)))
+      (search (get-dependencies graph package-path))
+      ;; It's possible that PACKAGE-PATH is its own indirect
+      ;; dependency, and so was already visited! Note that this code
+      ;; is now included _after_ the recursive search; else, VISITED
+      ;; will have no entries, and this code-path will therefore
+      ;; always be taken.
+      (unless (gethash package-path visited)
+        (add-to-modified-when-changed package-path)))
     modified))
 
 ;; Eshell integration.
