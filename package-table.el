@@ -136,14 +136,16 @@ environment."
          modified)
     (cl-labels ((search (dependencies)
                   ;; DEP refers to the current recompilation candidate.
-                  (dolist (dep dependencies modified)
-                    (unless (gethash dep visited)
+                  (dolist (dep dependencies)
+                    (catch 'continue
+                      (when (gethash dep visited)
+                        (throw 'continue nil))
                       (puthash dep t visited)
                       (when (file-newer-than-file-p (get-file penv dep :type 'full)
                                                     (get-file penv dep :type 'class))
                         (push dep modified))
                       (search (get-dependencies graph dep))))))
       (search (cons package-path (get-dependencies graph package-path))))
-    (map-pairs modified)))
+    modified))
 
 (provide 'package-table)
