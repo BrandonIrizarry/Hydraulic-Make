@@ -189,9 +189,9 @@ environment."
                               (t (concat arg "/"))))
 	              args)))
     (let* ((kwargs (keywordify))
-           (project-root (plist-get kwargs :root))
-           (package-subdir (plist-get kwargs :src))
-           (class-subdir (plist-get kwargs :bin)))
+           (project-root (or (plist-get kwargs :root) "./"))
+           (package-subdir (or (plist-get kwargs :src) "src/"))
+           (class-subdir (or (plist-get kwargs :bin) "bin/")))
       (--setup-java-invocation project-root package-subdir class-subdir))))
 
 (defun --setup-java-invocation (project-root package-subdir class-subdir)
