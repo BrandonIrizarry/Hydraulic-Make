@@ -173,7 +173,28 @@ environment."
       (let ((command (list (format "javac -g -cp \"lib/*:%s\" -d %s" class-subdir class-subdir))))
         (mapconcat #'identity (append command full-filenames) " ")))))
 
-(defun eshell/setup-java-invocation (project-root package-subdir class-subdir)
+(defun eshell/setup-java-invocation (&rest args)
+  ;; I'm not sure if it's possible to temporarily set
+  ;; ELISP-LISP-REGEXP for the scope of these calls, so we must intern
+  ;; keyword-like strings manually.
+  (cl-flet ((keywordify ()
+              (mapcar (lambda (arg)
+                        ;; Don't touch Lisp arguments (for example,
+                        ;; the user's ELISP-LISP-REGEXP might
+                        ;; recognize keyword syntax.) Else, assume
+                        ;; everything is a string.
+                        (cond ((not (stringp arg)) arg)
+                              ((string-prefix-p ":" arg) (intern arg))
+	                      ((string-suffix-p "/" arg) arg)
+                              (t (concat arg "/"))))
+	              args)))
+    (let* ((kwargs (keywordify))
+           (project-root (plist-get kwargs :root))
+           (package-subdir (plist-get kwargs :src))
+           (class-subdir (plist-get kwargs :bin)))
+      (--setup-java-invocation project-root package-subdir class-subdir))))
+
+(defun --setup-java-invocation (project-root package-subdir class-subdir)
   "Use an approach where the build and run commands are predefined
 by this setup command."
   (let ((penv (project-environment-create (expand-file-name project-root) package-subdir class-subdir)))
