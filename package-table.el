@@ -134,18 +134,21 @@ environment."
          ;; dependency graphs, we must keep track of visited nodes.
          (visited (make-hash-table :test #'equal))
          modified)
-    (cl-labels ((search (dependencies)
+    (cl-labels ((add-to-modified-when-changed (dep)
+                  (when (file-newer-than-file-p (get-file penv dep :type 'full)
+                                                (get-file penv dep :type 'class))
+                    (push dep modified)))
+                (search (dependencies)
                   ;; DEP refers to the current recompilation candidate.
                   (dolist (dep dependencies)
                     (catch 'continue
                       (when (gethash dep visited)
                         (throw 'continue nil))
                       (puthash dep t visited)
-                      (when (file-newer-than-file-p (get-file penv dep :type 'full)
-                                                    (get-file penv dep :type 'class))
-                        (push dep modified))
+                      (add-to-modified-when-changed dep)
                       (search (get-dependencies graph dep))))))
-      (search (cons package-path (get-dependencies graph package-path))))
+      (add-to-modified-when-changed package-path)
+      (search (get-dependencies graph package-path)))
     modified))
 
 ;; Eshell integration.
