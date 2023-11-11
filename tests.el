@@ -103,6 +103,12 @@ the empty string."
   (should (equal (list-deps penv "conference/Conference.java")
                  '("asturias.Cangas" "asturias.Gijon" "andaluz.Malaga" "andaluz.Sevilla"))))
 
+;; Dependency graph.
+(efs-use-fixtures create-dep-graph (ht-ucsd-defs)
+  :tags '(ucsd)
+  (dependency-graph-create penv))
+
+
 ;; Local Variables:
 ;; read-symbol-shorthands: (("efs-" . "ert-fixtures-") ("ht-" . "hmake-tests-"))
 ;; End:
