@@ -118,7 +118,7 @@ environment."
     (dolist (package-path (project-environment-files penv) graph)
       (puthash package-path
                (cl-loop for pkg-dep in (list-deps penv package-path) collect
-                     (gethash pkg-dep (project-environment-package-map penv)))
+                     (cdr (assoc pkg-dep (project-environment-package-to-file-alist penv))))
                graph))
     (dependency-graph--create :graph graph)))
 

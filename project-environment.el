@@ -17,9 +17,9 @@ PROJECT-ROOT/bin).
 FILES: the list of files belonging to the project, as full-path
 strings.
 
-PACKAGE-MAP: map fully qualified names back to their original
-files (hash table)."
-  project-root package-root class-root files (package-map (make-hash-table :test #'equal)))
+PACKAGE-TO-FILE-ALIST: map between fully qualified names and their
+associated files (alist)."
+  project-root package-root class-root files package-to-file-alist)
 
 (defun project-environment-create (project-root package-subdir class-subdir)
   "The public constructor for PROJECT-ENVIRONMENT objects."
@@ -47,8 +47,10 @@ gmapsfx/shapes/CircleOptions.java, this method returns
            (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
            (or (match-string-no-properties 1)
                "default"))))
-    ;; Cache the package-name-to-file association in the package-map.
-    (puthash (concat package "." (file-name-base package-path)) package-path (project-environment-package-map this))
+    ;; Cache the package-name-to-file association.
+    (push (cons (concat package "." (file-name-base package-path))
+                package-path)
+          (project-environment-package-to-file-alist this))
     package))
 
 (cl-defmethod get-file ((this project-environment) package-path &key type)
