@@ -153,7 +153,7 @@ environment."
 
 ;; Eshell integration.
 
-(cl-defmethod generate-invocation ((penv project-environment) target)
+(cl-defmethod generate-invocation ((penv project-environment) target class-subdir)
   (catch 'done
     (let* ((modified-dependencies (get-modified-dependencies penv target))
            (full-filenames (mapcar (lambda (moddep)
@@ -163,7 +163,7 @@ environment."
         (throw 'done
           (user-error "Nothing to build.")))
 
-      (let ((command (list "javac" "-g" "-cp" "\"lib/*:bin\"" "-d" "bin")))
+      (let ((command (list (format "javac -g -cp \"lib/*:%s\" -d %s" class-subdir class-subdir))))
         (mapconcat #'identity (append command full-filenames) " ")))))
 
 (defun eshell/setup-java-invocation (project-root package-subdir class-subdir)
@@ -174,7 +174,7 @@ by this setup command."
     (defun eshell/java-build (target)
       "Insert the appropriate build command into the Eshell prompt."
       (eshell-kill-input)
-      (insert (generate-invocation penv target))
+      (insert (generate-invocation penv target class-subdir))
 
       (defun eshell/java-run ()
         "Insert the appropriate run command into the Eshell prompt."
