@@ -167,8 +167,7 @@ environment."
                                      (get-file penv moddep :type 'full))
                                    modified-dependencies)))
       (unless full-filenames
-        (throw 'done
-          (user-error "Nothing to build.")))
+        (throw 'done nil))
 
       (let ((command (list (format "javac -g -cp \"lib/*:%s\" -d %s" class-subdir class-subdir))))
         (mapconcat #'identity (append command full-filenames) " ")))))
@@ -203,7 +202,10 @@ by this setup command."
     (defun eshell/java-build (target)
       "Insert the appropriate build command into the Eshell prompt."
       (eshell-kill-input)
-      (insert (generate-invocation penv target class-subdir))
+      (let ((invocation (generate-invocation penv target class-subdir)))
+        (if invocation
+            (insert invocation)
+          (eshell-print "Nothing to build\n----\n")))
 
       (defun eshell/java-run ()
         "Insert the appropriate run command into the Eshell prompt."
