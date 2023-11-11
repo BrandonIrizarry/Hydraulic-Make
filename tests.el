@@ -104,11 +104,16 @@ the empty string."
                  '("asturias.Cangas" "asturias.Gijon" "andaluz.Malaga" "andaluz.Sevilla"))))
 
 ;; Dependency graph.
-(efs-use-fixtures create-dep-graph (ht-ucsd-defs)
+(defvar ht-ucsd-dep-graph (efs-define-fixture ((graph (dependency-graph-create penv)))))
+
+(efs-use-fixtures create-dep-graph (ht-ucsd-defs ht-ucsd-dep-graph)
   :tags '(ucsd edebug)
-  (let ((graph (dependency-graph-create penv)))
-    (get-dependencies graph "application/MapApp.java")
-    (get-dependencies graph "application/RouteVisualization.java")))
+  (get-dependencies graph "application/MapApp.java")
+  (get-dependencies graph "application/RouteVisualization.java"))
+
+(efs-use-fixtures check-modified-deps (ht-ucsd-defs)
+  :tags '(ucsd edebug)
+  (get-modified-dependencies penv "application/MapApp.java"))
 
 
 ;; Local Variables:
