@@ -16,7 +16,7 @@ PROJECT-ROOT/bin).
 
 FILES: the list of files belonging to the project, as full-path
 strings."
-  project-root package-root class-root files file-to-package-alist)
+  project-root package-root class-root files)
 
 (defun project-environment-create (project-root package-subdir class-subdir)
   "The public constructor for PROJECT-ENVIRONMENT objects."
@@ -24,20 +24,12 @@ strings."
          (penv (project-environment--create
                 :project-root project-root
                 :package-root package-root
-                :class-root (concat project-root class-subdir)))
-         file-to-package-alist)
+                :class-root (concat project-root class-subdir))))
     (setf (project-environment-files penv)
-          (mapcar (lambda (filename)
-                    (let ((package-path (string-remove-prefix package-root filename)))
-                      (push (cons package-path  (format "%s.%s"
-                                                        (get-package penv package-path)
-                                                        (file-name-base package-path)))
-                            file-to-package-alist)
-                      package-path))
+          (mapcar (lambda (fullpath)
+                    (string-remove-prefix package-root fullpath))
                   (directory-files-recursively package-root
                                                (rx bol (not (any ".#")) (* not-newline) ".java" eol))))
-    (setf (project-environment-file-to-package-alist penv)
-          file-to-package-alist)
     penv))
 
 (cl-defmethod get-package ((this project-environment) package-path)
