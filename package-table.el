@@ -167,10 +167,12 @@ by this setup command."
   (let ((penv (project-environment-create (expand-file-name project-root) package-subdir class-subdir)))
 
     (defun eshell/java-build (target)
+      "Insert the appropriate build command into the Eshell prompt."
       (eshell-kill-input)
       (insert (generate-invocation penv target))
 
       (defun eshell/java-run ()
+        "Insert the appropriate run command into the Eshell prompt."
         (eshell-kill-input)
         (let ((package-unit-no-extension (thread-last
                                            target
