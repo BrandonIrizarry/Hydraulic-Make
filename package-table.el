@@ -207,12 +207,10 @@ by this setup command."
       (defun eshell/java-run ()
         "Insert the appropriate run command into the Eshell prompt."
         (eshell-kill-input)
-        (let ((package-unit-no-extension (thread-last
-                                           target
-                                           (replace-regexp-in-string (rx "/") ".")
-                                           (replace-regexp-in-string (rx ".java" eos) ""))))
-          (insert (format "java -cp \"lib/*:%s\" %s" class-subdir package-unit-no-extension))))
-
+        (let ((package (get-package penv target)))
+          (insert (format "java -cp \"lib/*:%s\" %s"
+                          class-subdir
+                          (concat package "." (file-name-base target))))))
 
       ;; Generate the build command (or else insert the run command.)
       (eshell-kill-input)
