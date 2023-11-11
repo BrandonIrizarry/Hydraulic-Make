@@ -2,7 +2,7 @@
 
 ;; Eshell integration.
 
-(require 'h-package-table)
+(require 'h-dependency-graph)
 
 (cl-defmethod h-generate-invocation ((penv h-project-environment) target class-subdir)
   (catch 'done
