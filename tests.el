@@ -43,7 +43,7 @@
 project)."
   :tags '(duke)
   (should (equal (list-deps penv "application/MapApp.java")
-                 '("MarkerManager" "SelectManager" "geography.GeographicPoint" "CLabel" "DataSet" "gmapsfx.javascript.object.MapTypeIdEnum" "gmapsfx.javascript.object.MapOptions" "gmapsfx.javascript.object.LatLong" "gmapsfx.javascript.object.GoogleMap" "gmapsfx.MapComponentInitializedListener" "gmapsfx.GoogleMapView" "application.services.RouteService" "application.services.GeneralService" "application.controllers.RouteController" "application.controllers.FetchController"))))
+                 '("application.MarkerManager" "application.SelectManager" "geography.GeographicPoint" "application.CLabel" "application.DataSet" "gmapsfx.javascript.object.MapTypeIdEnum" "gmapsfx.javascript.object.MapOptions" "gmapsfx.javascript.object.LatLong" "gmapsfx.javascript.object.GoogleMap" "gmapsfx.MapComponentInitializedListener" "gmapsfx.GoogleMapView" "application.services.RouteService" "application.services.GeneralService" "application.controllers.RouteController" "application.controllers.FetchController"))))
 
 ;;; WEATHER DATA (DUKE)
 
@@ -89,9 +89,9 @@ the empty string."
 
 (efs-use-fixtures wordngram-deps (ht-duke-wordgram-defs)
   "Examine the dependencies of '~/Java/DukeIntro/Course_4/week_3/WordNGramStarterProgram/Main.java'."
-  :tags '(duke)
+  :tags '(duke deps)
   (should (equal (list-deps penv "Main.java")
-                 '("MarkovWordTwo" "IMarkovModel"))))
+                 '("default.MarkovWordTwo" "default.IMarkovModel"))))
 
 (defvar ht-fakeproject-defs
   (efs-define-fixture
@@ -99,7 +99,7 @@ the empty string."
 
 (efs-use-fixtures conference-deps (ht-fakeproject-defs)
   "Examine the dependencies of 'conference/Conference.java'."
-  :tags '(me)
+  :tags '(me deps)
   (should (equal (list-deps penv "conference/Conference.java")
                  '("asturias.Cangas" "asturias.Gijon" "andaluz.Malaga" "andaluz.Sevilla"))))
 

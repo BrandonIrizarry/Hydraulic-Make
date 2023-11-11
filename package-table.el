@@ -89,7 +89,9 @@
               ;; simplify what follows.
               (when (and (equal parent-package "default")
                          (member identifier (get-files this "default")))
-                (puthash identifier t mentions)
+                ;; For now, use this format for identifiers that
+                ;; belong to the default package.
+                (puthash (concat "default." identifier) t mentions)
                 (throw 'continue nil))
 
               ;; Whatever else, will fall through to here.
