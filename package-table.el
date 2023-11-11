@@ -201,12 +201,9 @@ by this setup command."
 
     (defun eshell/java-build (target)
       "Insert the appropriate build command into the Eshell prompt."
-      (eshell-kill-input)
-      (let ((invocation (generate-invocation penv target class-subdir)))
-        (if invocation
-            (insert invocation)
-          (eshell-print "Nothing to build\n----\n")))
 
+      ;; Let's define this right away, so that we can use it to insert
+      ;; the run command right away if there's nothing to build.
       (defun eshell/java-run ()
         "Insert the appropriate run command into the Eshell prompt."
         (eshell-kill-input)
@@ -214,6 +211,16 @@ by this setup command."
                                            target
                                            (replace-regexp-in-string (rx "/") ".")
                                            (replace-regexp-in-string (rx ".java" eos) ""))))
-          (insert (format "java -cp \"lib/*:bin\" %s" package-unit-no-extension)))))))
+          (insert (format "java -cp \"lib/*:bin\" %s" package-unit-no-extension))))
+
+
+      ;; Generate the build command (or else insert the run command.)
+      (eshell-kill-input)
+
+      (let ((invocation (generate-invocation penv target class-subdir)))
+        (if invocation
+            (insert invocation)
+          (eshell-print "Nothing to build; inserting run command\n----\n")
+          (eshell/java-run))))))
 
 (provide 'package-table)
