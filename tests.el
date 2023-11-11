@@ -106,7 +106,8 @@ the empty string."
 ;; Dependency graph.
 (efs-use-fixtures create-dep-graph (ht-ucsd-defs)
   :tags '(ucsd edebug)
-  (dependency-graph-create penv))
+  (let ((graph (dependency-graph-create penv)))
+    (get-dependencies graph "application/MapApp.java")))
 
 
 ;; Local Variables:

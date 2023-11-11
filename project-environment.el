@@ -15,8 +15,11 @@ CLASS-ROOT: the top-level class-file directory (for example,
 PROJECT-ROOT/bin).
 
 FILES: the list of files belonging to the project, as full-path
-strings."
-  project-root package-root class-root files)
+strings.
+
+PACKAGE-MAP: map fully qualified names back to their original
+files (hash table)."
+  project-root package-root class-root files (package-map (make-hash-table :test #'equal)))
 
 (defun project-environment-create (project-root package-subdir class-subdir)
   "The public constructor for PROJECT-ENVIRONMENT objects."
@@ -37,12 +40,16 @@ strings."
 For example, if PACKAGE-PATH is
 gmapsfx/shapes/CircleOptions.java, this method returns
 \"gmapsfx.shapes\"."
-  (with-temp-buffer
-    (insert-file (get-file this package-path :type 'full))
-    (strip-non-code-artefacts)
-    (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
-    (or (match-string-no-properties 1)
-        "default")))
+  (let ((package
+         (with-temp-buffer
+           (insert-file (get-file this package-path :type 'full))
+           (strip-non-code-artefacts)
+           (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
+           (or (match-string-no-properties 1)
+               "default"))))
+    ;; Cache the package-name-to-file association in the package-map.
+    (puthash (concat package "." (file-name-base package-path)) package-path (project-environment-package-map this))
+    package))
 
 (cl-defmethod get-file ((this project-environment) package-path &key type)
   "Get a filename equivalent to PACKAGE-PATH, selecting the format
