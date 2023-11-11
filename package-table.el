@@ -165,16 +165,17 @@ environment."
   "Use an approach where the build and run commands are predefined
 by this setup command."
   (let ((penv (project-environment-create (expand-file-name project-root) package-subdir class-subdir)))
+
     (defun eshell/java-build (target)
       (eshell-kill-input)
-      (insert (generate-invocation penv target)))
+      (insert (generate-invocation penv target))
 
-    (defun eshell/java-run (target)
-      (eshell-kill-input)
-      (let ((package-unit-no-extension (thread-last
-                                         target
-                                         (replace-regexp-in-string (rx "/") ".")
-                                         (replace-regexp-in-string (rx ".java" eos) ""))))
-        (insert (format "java -cp \"lib/*:bin\" %s" package-unit-no-extension))))))
+      (defun eshell/java-run ()
+        (eshell-kill-input)
+        (let ((package-unit-no-extension (thread-last
+                                           target
+                                           (replace-regexp-in-string (rx "/") ".")
+                                           (replace-regexp-in-string (rx ".java" eos) ""))))
+          (insert (format "java -cp \"lib/*:bin\" %s" package-unit-no-extension)))))))
 
 (provide 'package-table)
