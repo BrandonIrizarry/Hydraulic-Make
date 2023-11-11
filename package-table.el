@@ -192,6 +192,7 @@ environment."
            (project-root (or (plist-get kwargs :root) "./"))
            (package-subdir (or (plist-get kwargs :src) "src/"))
            (class-subdir (or (plist-get kwargs :bin) "bin/")))
+      (eshell-print (format "project root: '%s'\nsource directory: '%s'\nclass-file directory: '%s'\n----\n" project-root package-subdir class-subdir))
       (--setup-java-invocation project-root package-subdir class-subdir))))
 
 (defun --setup-java-invocation (project-root package-subdir class-subdir)
