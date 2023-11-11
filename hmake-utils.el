@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
-(defun strip-non-code-artefacts ()
+(defun hu-strip-non-code-artefacts ()
   "Strip the current temporary buffer of non-code artefacts."
   (when (string-match-p (rx bos " *temp*") (buffer-name))
     (save-excursion
@@ -19,9 +19,13 @@
                                   nil t)
           (replace-match ""))))))
 
-(defun get-current-line ()
+(defun hu-get-current-line ()
   "Return the line POINT is on in the current temporary buffer."
   (string-trim (buffer-substring-no-properties (line-beginning-position)
                                                (line-end-position))))
 
-(provide 'utils)
+(provide 'hmake-utils)
+
+;; Local Variables:
+;; read-symbol-shorthands: (("hu-" . "hmake-utils-"))
+;; End:
