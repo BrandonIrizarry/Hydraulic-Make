@@ -155,10 +155,9 @@ environment."
 
 (cl-defmethod generate-invocation ((penv project-environment) target)
   (let* ((modified-dependencies (get-modified-dependencies penv target))
-         (full-filenames (cons (get-file penv target :type 'full)
-                               (mapcar (lambda (moddep)
-                                         (get-file penv moddep :type 'full))
-                                       modified-dependencies)))
+         (full-filenames (mapcar (lambda (moddep)
+                                   (get-file penv moddep :type 'full))
+                                 modified-dependencies))
          (command (list "javac" "-g" "-cp" "\"lib/*:bin\"" "-d" "bin")))
     (mapconcat #'identity
                (append command full-filenames)
