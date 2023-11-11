@@ -40,18 +40,22 @@ associated files (alist)."
 For example, if PACKAGE-PATH is
 gmapsfx/shapes/CircleOptions.java, this method returns
 \"gmapsfx.shapes\"."
-  (let ((package
-         (with-temp-buffer
-           (insert-file (get-file this package-path :type 'full))
-           (strip-non-code-artefacts)
-           (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
-           (or (match-string-no-properties 1)
-               "default"))))
-    ;; Cache the package-name-to-file association.
-    (push (cons (concat package "." (file-name-base package-path))
-                package-path)
-          (project-environment-package-to-file-alist this))
-    package))
+  (catch 'cached
+    (let ((suffix (concat "." (file-name-base package-path))))
+      (when-let ((cached-package (car (rassoc package-path (project-environment-package-to-file-alist this)))))
+        (throw 'cached (string-remove-suffix suffix cached-package)))
+      (let ((package
+             (with-temp-buffer
+               (insert-file (get-file this package-path :type 'full))
+               (strip-non-code-artefacts)
+               (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
+               (or (match-string-no-properties 1)
+                   "default"))))
+        ;; Cache the package-name-to-file association.
+        (push (cons (concat package suffix)
+                    package-path)
+              (project-environment-package-to-file-alist this))
+        package))))
 
 (cl-defmethod get-file ((this project-environment) package-path &key type)
   "Get a filename equivalent to PACKAGE-PATH, selecting the format
