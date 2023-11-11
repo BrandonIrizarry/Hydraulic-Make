@@ -1,9 +1,73 @@
-* Hydraulic Make
-** Copyright
+#+TITLE: Hydraulic Make
+#+AUTHOR: Brandon C. Irizarry
+
+* Copyright
 Copyright (C) 2001-2023 Brandon C. Irizarry.
 See the end of the file for license conditions.
 
-** License Conditions
+* Introduction
+Hydraulic Make, or ~hmake~ for short, is an Emacs library to aid in
+compiling and running Java projects. It accepts a file as input. It
+calculates the dependencies of that file, and checks to see which ones
+have been updated. These in turn are used to output a compilation
+command.
+
+For example, say I have a Java project under =~/Java/Project=. The
+main function for this application is under
+=~/Java/Project/src/application/Main.java=. Furthermore, I prefer that
+all compilation output be included under a project subdirectory
+=bin=.
+
+I must first setup the project environment from Eshell. Eshell was
+specifically chosen because integration with it from Emacs is
+trivial. I specify the project root directory, as well as the source
+and class directories:
+
+#+begin_example
+$ hmake-setup :root ~/Java/Project :src src :bin bin
+#+end_example
+
+This defines =eshell/hmake-build-command=, which accepts the file we
+want to run as input. When run, it'll insert the needed build command
+into the Eshell prompt.
+
+#+begin_example
+$ hmake-build-command application/Main.java
+#+end_example
+
+Let's assume that =application/Main.java= depends on
+=geometry/objects/Point.java=, under =src=, and that we've modified
+the latter since the last build. Then, after executing, the program
+finds out about this dependency, and then inserts the corresponding
+build command into the prompt.
+
+#+begin_example
+$ javac -g -cp "lib/*:bin" -d bin <full path to Point.java>
+#+end_example
+
+The user then runs this command as desired. Now, all that's left is to
+run =application.Main=. To make running the application more
+convenient, =eshell/hmake-build-command= defines
+=eshell/hmake-run-command=, which takes in no arguments.
+
+#+begin_example
+$ hmake-run-command
+#+end_example
+
+The prompt now holds the command we wish to run.
+
+#+begin_example
+$ java -cp "lib/*:bin" application.Main
+#+end_example
+
+If there is nothing to rebuild, then the run command is immediately
+inserted into the prompt.
+
+* Possible improvements
++ Make compilation command more configurable (e.g, debug flags,
+  setting library subdirectory other than "lib")
+
+* License Conditions
 You should have received a copy of the GNU General Public License
 along with Hydraulic Make.  If not, see
 <https://www.gnu.org/licenses/>.
