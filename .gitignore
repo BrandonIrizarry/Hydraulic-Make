@@ -2,3 +2,7 @@
 /notes.org
 *.org
 !README.org
+
+*-autoloads.el
+*-pkg.el
+*.elc
