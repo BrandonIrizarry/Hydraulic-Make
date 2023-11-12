@@ -43,8 +43,16 @@
 by this setup command."
   (let ((penv (h-project-environment-create (expand-file-name project-root) package-subdir class-subdir)))
 
-    (defun eshell/hmake-build-command (target)
-      "Insert the appropriate build command into the Eshell prompt."
+    (defun eshell/hmake-build-command (&optional target)
+      "Insert the appropriate build command into the Eshell promqpt.
+
+Note that TARGET is required\; it's marked with '&optional'
+because NIL is a valid input (the user, for example, may forget
+to supply an argument. Otherwise, not supplying an argument
+results in a somewhat long error message."
+
+      (unless target
+        (user-error "You must supply a path to a file (relative to source directory)"))
 
       ;; Let's define this right away, so that we can use it to insert
       ;; the run command right away if there's nothing to build.
