@@ -5,6 +5,17 @@
 Copyright (C) 2001-2023 Brandon C. Irizarry.
 See the end of the file for license conditions.
 
+* Installation
+This package requires Emacs>=29.
+
+One could use the following Elisp code for installation. Note that the
+package's tests depend on another one I've written, =ert-fixtures=.
+
+#+begin_src emacs-lisp
+  (package-vc-install "https://github.com/BrandonIrizarry/ert-fixtures" "main" 'Git)
+  (package-vc-install "https://github.com/BrandonIrizarry/Hydraulic-Make" "main" 'Git 'hmake)
+#+end_src
+
 * Introduction
 Hydraulic Make, or ~hmake~ for short, is an Emacs library to aid in
 compiling and running Java projects. It accepts a file as input. It
