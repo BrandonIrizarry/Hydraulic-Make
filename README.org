@@ -66,6 +66,8 @@ inserted into the prompt.
 * Possible improvements
 + Make compilation command more configurable (e.g, debug flags,
   setting library subdirectory other than "lib")
++ If needed, cache the dependencies of a given file if it hasn't been
+  modified.
 
 * License Conditions
 You should have received a copy of the GNU General Public License
