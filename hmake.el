@@ -57,7 +57,10 @@ results in a somewhat long error message."
       ;; Let's define this right away, so that we can use it to insert
       ;; the run command right away if there's nothing to build.
       (defun eshell/hmake-run-command ()
-        "Insert the appropriate run command into the Eshell prompt."
+        "Insert the appropriate run command into the Eshell prompt.
+
+This is a convenience function defined to make workflows
+smoother."
         (eshell-kill-input)
         (let ((package (h-get-package penv target)))
           (insert (format "java -cp \"lib/*:%s\" %s"
