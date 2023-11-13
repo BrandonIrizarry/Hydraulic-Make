@@ -1,6 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
-(require 'h-package-table)
+(require 'h-dependency-graph)
 (require 'ert-fixtures)
 
 (defvar ht-ucsd-defs
