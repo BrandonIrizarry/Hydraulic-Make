@@ -61,7 +61,12 @@
           ;; Strangely, this is beneath the while-test, yet the
           ;; while-test still executes!
           (catch 'continue
-            (let ((identifier (match-string-no-properties 0)))
+            ;; Grab these first, since we might mess with the match
+            ;; data later.
+            (let* ((identifier (match-string-no-properties 0))
+                   (maybe-package-prefix (string-remove-suffix "." (match-string-no-properties 1)))
+                   (maybe-static-root (progn (string-match (rx java-identifier) identifier)
+                                             (match-string-no-properties 0 identifier))))
 
               ;; Check import statements for globs.
               (when (and (equal identifier "import")
@@ -98,12 +103,13 @@
                 (throw 'continue nil))
 
               ;; Whatever else, will fall through to here.
-              (let ((prefix (string-remove-suffix "." (match-string-no-properties 1)))
-                    (terminal (match-string-no-properties 2)))
-                (cond ((h-package-p this prefix)
-                       (puthash identifier t mentions))
-                      ((and (string-empty-p prefix)
-                            (member identifier local-files))
+              (cond ((h-package-p this maybe-package-prefix)
+                     (puthash identifier t mentions))
+                    ((member maybe-static-root local-files)
+                     (puthash (concat parent-package "." maybe-static-root) t mentions))
+                    ((string-empty-p maybe-package-prefix)
+                     ;; IDENTIFIER is a "terminal"
+                     (when (member identifier local-files)
                        (puthash (concat parent-package "." identifier) t mentions)))))))
         mentions))))
 
