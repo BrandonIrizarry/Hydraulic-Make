@@ -92,17 +92,8 @@
                 (goto-char (line-end-position))
                 (throw 'continue nil))
 
-              ;; Since this check doesn't depend on 'prefix' or
-              ;; 'terminal' (see below), putting it here may let us
-              ;; simplify what follows.
-              (when (and (equal parent-package "default")
-                         (member identifier (h-get-files this "default")))
-                ;; For now, use this format for identifiers that
-                ;; belong to the default package.
-                (puthash (concat "default." identifier) t mentions)
-                (throw 'continue nil))
-
-              ;; Whatever else, will fall through to here.
+              ;; IDENTIFIER possibly contains dependency information,
+              ;; so let's check for it.
               (cond ((h-package-p this maybe-package-prefix)
                      (puthash identifier t mentions))
                     ((member maybe-static-root local-files)
