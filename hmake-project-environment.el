@@ -69,11 +69,15 @@ using the keyword argument TYPE."
     ('full (concat (h-project-environment-package-root this)
                    package-path))
     ('class (concat (h-project-environment-class-root this)
-                    (replace-regexp-in-string "\\.java\\'" ".class"
-                                              package-path)))
-    ('package (concat (h-get-package this package-path)
-                      "."
-                      (file-name-base package-path)))
+                    (concat (replace-regexp-in-string (rx ".")
+                                                      "/"
+                                                      (h-get-file this package-path :type 'package))
+                            ".class")))
+    ('package (let ((package (h-get-package this package-path))
+                    (base (file-name-base package-path)))
+                (if (equal package "default")
+                    base
+                  (concat package "." base))))
     ('basename (file-name-base package-path))))
 
 (provide 'h-project-environment)
