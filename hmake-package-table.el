@@ -50,7 +50,7 @@
              ;; The following is the one we'll be using. It'll match
              ;; object fields and methods, but it'll also match
              ;; package uses.
-             (java-compound-identifier (: (group (* java-identifier ".")) (group java-identifier))))
+             (java-compound-identifier (: (group (* java-identifier ".")) java-identifier)))
       ;; MENTIONS is our return value. It's defined as a hash table,
       ;; to avoid duplicates.
       (let* ((mentions (make-hash-table :test #'equal))
