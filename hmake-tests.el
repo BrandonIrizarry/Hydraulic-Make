@@ -11,25 +11,37 @@
        (example-file "gmapsfx/shapes/CircleOptions.java")
        (example-class "gmapsfx/shapes/CircleOptions.class")
        (example-package-unit "gmapsfx.shapes.CircleOptions")
-       (penv (h-project-environment-create project-root "src/" "bin/")))))
+       (penv (h-project-environment-create project-root "src/" "bin/"))))
+  "A UCSD project definition with some auxiliary data provided.")
 
 (efs-use-fixtures get-full-filename (ht-ucsd-defs)
+  "Test getting the full filename from the given relative path."
+  :tags '(file-format)
   (should (equal (h-get-file penv example-file :type 'full)
                  (concat package-root example-file))))
 
 (efs-use-fixtures get-path-to-class-file (ht-ucsd-defs)
+  "Test getting the class file from the given relative path."
+  :tags '(file-format)
   (should (equal (h-get-file penv example-file :type 'class)
                  (concat class-root example-class))))
 
 (efs-use-fixtures get-package-unit (ht-ucsd-defs)
+  "Test getting the fully qualified name from the given relative
+path."
+  :tags '(file-format)
   (should (equal (h-get-file penv example-file :type 'package)
                  "gmapsfx.shapes.CircleOptions")))
 
 (efs-use-fixtures get-package (ht-ucsd-defs)
+  "Test getting the parent package from the given relative path."
+  :tags '(file-format)
   (should (equal (h-get-package penv example-file)
                  "gmapsfx.shapes")))
 
 (efs-use-fixtures get-basename (ht-ucsd-defs)
+  "Test getting the basename from the given relative path."
+  :tags '(file-format)
   (should (equal (h-get-file penv example-file :type 'basename)
                  "CircleOptions")))
 
