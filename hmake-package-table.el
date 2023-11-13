@@ -96,6 +96,8 @@
               ;; so let's check for it.
               (cond ((h-package-p this maybe-package-prefix)
                      (puthash identifier t mentions))
+                    ;; The following also catches members of the
+                    ;; default package.
                     ((member maybe-static-root local-files)
                      (puthash (concat parent-package "." maybe-static-root) t mentions))
                     ((string-empty-p maybe-package-prefix)
