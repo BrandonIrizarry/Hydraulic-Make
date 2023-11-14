@@ -21,8 +21,11 @@ PACKAGE-TO-FILE-ALIST: map between fully qualified names and their
 associated files (alist)."
   project-root package-root class-root files package-to-file-alist)
 
-(defun h-project-environment-create (project-root package-subdir class-subdir)
+(cl-defun h-project-environment-create (project-root &key src bin &aux (package-subdir src) (class-subdir bin))
   "The public constructor for HMAKE-PROJECT-ENVIRONMENT objects."
+  (setq package-subdir (or package-subdir "src/"))
+  (setq class-subdir (or class-subdir "bin/"))
+
   (let* ((package-root (concat project-root package-subdir))
          (penv (h-project-environment--create
                 :project-root project-root
