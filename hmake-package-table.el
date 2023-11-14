@@ -155,9 +155,7 @@ PACKAGE-PATH."
                  (sort (h-find-dependencies ptable "Madrid.java") #'string<))))
 
 ;; BUGS:
-;; default.MazeLoader - correct, but not in default package
-;; default.MazeNode - same.
-;; week3example.MazeNode - correct. But why is this one here, and not MazeLoader?
+;; week3example.MazeLoader isn't found.
 (efs-use-fixtures test3 (ht-fixture2)
   :tags '(package-table find-dependencies)
   (should (equal '("week3example.MazeLoader" "week3example.MazeNode")
