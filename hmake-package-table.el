@@ -29,79 +29,117 @@
   "Check whether PACKAGE is one of the project's packages."
   (gethash package (h-package-table-table this)))
 
+(cl-defmethod h-analyze-imports ((this h-package-table) tmp-buffer)
+  "Analyze the various import statements inside TMP-BUFFER.
+
+Return the list of dependencies DEPS.
+
+IMPORT: If the penultimate prefix is a package, then do the
+following: If the argument has a glob, add the implied members to
+DEPS. Else, add the argument itself to DEPS.
+
+IMPORT STATIC: Use HMAKE-UTILS-GET-SUCCESSIVE-PREFIXES to find
+the type being used."
+  (with-current-buffer tmp-buffer
+    (goto-char (point-min))
+    (let ((deps (list)))
+      (while (re-search-forward "import" nil t)
+        (let* ((import-static-p (re-search-forward "static" (line-end-position) t))
+               ;; Trailing semicolon is removed here. See
+               ;; 'hmake-utils-get-rest-of-line'.
+               (argument (hu-get-rest-of-line))
+               (prefixes (hu-get-successive-prefixes argument)))
+          (let ((dep
+                 (cond
+                   ;; Static imports must have at least one package
+                   ;; prefixing everything, followed by the datatype,
+                   ;; followed by what's imported.
+                   (import-static-p
+                    (cl-assert (>= 3 (length prefixes)))
+                    (let ((package (nth (- (length prefixes) 3) prefixes)))
+                      (when (h-package-p this package)
+                        (nth (- (length prefixes) 2) prefixes))))
+
+                   ;; Glob used with (non-static) import
+                   ((string-match-p "\\.\\*;\\'" argument)
+                    ;; Note: we flatten DEPS at the end in case
+                    ;; this code path gets hit.
+                    (cl-loop
+                          for file in (h-get-files this penultimate-prefix)
+                          when (h-get-file this file :type 'package)
+                          collect (h-get-file this file :type 'package)))
+
+                   ;; Ordinary import.
+                   (t argument))))
+            (push dep deps))))
+      ;; Upon exiting the while loop, we've reached the end of the
+      ;; buffer; so let's find our way back to the last import
+      ;; statement, and then move forward to the beginning of the next
+      ;; line.
+      ;;
+      ;; If there's no import statement to go back to, simply move to
+      ;; the beginning of the buffer. Make sure to skip the package
+      ;; statement if present.
+      (or (and (re-search-backward "import" nil t)
+               (forward-line 1))
+          (progn
+            (goto-char (point-min))
+            (and (re-search-forward "package" nil t)
+                 (forward-line 1))))
+      ;; Return the dependencies we've found so far.
+      ;;
+      ;; Flatten the list in case there are instances of plain-import
+      ;; globs.
+      (flatten-list deps))))
+
 (cl-defmethod h-find-dependencies ((this h-package-table) package-path)
-  "Find and return hash-set of dependencies of PACKAGE-PATH."
+  "Find and return the list of immediate dependencies of
+PACKAGE-PATH."
   (with-temp-buffer
     (insert-file (h-get-file this package-path :type 'full))
     (hu-strip-non-code-artefacts)
-    (rx-let ((java-identifier (: (any alpha "_") (* (any alnum "_"))))
-             ;; The following is the one we'll be using. It'll match
-             ;; object fields and methods, but it'll also match
-             ;; package uses.
-             (java-compound-identifier (: (group (* java-identifier ".")) java-identifier)))
-      ;; MENTIONS is our return value. It's defined as a hash table,
-      ;; to avoid duplicates.
-      (let* ((mentions (make-hash-table :test #'equal))
-             (parent-package (h-get-package (h-package-table-penv this) package-path))
-             (local-files (remove (file-name-base package-path)
-                                  (mapcar #'file-name-base (h-get-files this parent-package)))))
-        (while (re-search-forward (rx java-compound-identifier) nil t)
-          ;; Strangely, this is beneath the while-test, yet the
-          ;; while-test still executes!
-          (catch 'continue
-            ;; Grab these first, since we might mess with the match
-            ;; data later.
-            (let* ((identifier (match-string-no-properties 0))
-                   (maybe-package-prefix (string-remove-suffix "." (match-string-no-properties 1)))
-                   (maybe-static-root (progn (string-match (rx java-identifier) identifier)
-                                             (match-string-no-properties 0 identifier))))
+    (let* ((deps (list))
+           (parent-package (h-get-package (h-package-table-penv this) package-path))
+           (local-files (remove (file-name-base package-path)
+                                (mapcar #'file-name-base (h-get-files this parent-package)))))
 
-              ;; Check import statements for globs.
-              (when (and (equal identifier "import")
-                         (string-match-p "\\.\\*;\\'"
-                                         (hu-get-current-line)))
-                (let ((package (progn (re-search-forward (rx java-compound-identifier)
-                                                         (line-end-position))
-                                      (match-string-no-properties 0))))
-                  (dolist (file (h-get-files this package))
-                    (puthash (h-get-file (h-package-table-penv this) file :type 'package)
-                             t
-                             mentions))
-                  (goto-char (line-end-position))
-                  (throw 'continue nil)))
+      (setq deps (nconc deps (h-analyze-imports this (current-buffer))))
 
-              ;; If a non-glob import, we still may as well skip the
-              ;; word "import" itself (simplifies debugging).
-              (when (equal identifier "import")
-                (throw 'continue nil))
+      (while (re-search-forward (rx hu-java-compound-identifier) nil t)
+        (let* ((identifier (match-string-no-properties 0))
+               (prefixes (hu-get-successive-prefixes identifier))
+               (dep (if (= 1 (length prefixes))
+                        (progn
+                          (cl-assert (equal (car prefixes) identifier))
+                          (when (member identifier local-files)
+                            (concat parent-package "." identifier)))
+                      (let ((intended-package (cl-find-if (lambda (prefix) (h-package-p this prefix)) prefixes :from-end t)))
+                        (when-let ((index (seq-position prefixes intended-package)))
+                          (nth (1+ index) prefixes))))))
+          (push dep deps)))
+      ;; Return the dependencies we found, removing duplicates, and
+      ;; flattening to remove occurrences of NIL.
+      (cl-remove-duplicates (flatten-list deps) :test #'equal))))
 
-              ;; Similarly, skip package statement.
-              (when (equal identifier "package")
-                (goto-char (line-end-position))
-                (throw 'continue nil))
+;; Tests
+(require 'ert-fixtures)
 
-              ;; IDENTIFIER possibly contains dependency information,
-              ;; so let's check for it.
-              (cond ((h-package-p this maybe-package-prefix)
-                     (puthash identifier t mentions))
-                    ;; The following also catches members of the
-                    ;; default package.
-                    ((member maybe-static-root local-files)
-                     (puthash (concat parent-package "." maybe-static-root) t mentions))
-                    ((string-empty-p maybe-package-prefix)
-                     ;; IDENTIFIER is a "terminal"
-                     (when (member identifier local-files)
-                       (puthash (concat parent-package "." identifier) t mentions)))))))
-        mentions))))
+(defvar ht-fixture1 (efs-define-fixture ((project-root "~/Java/FakeProject/")
+                                         (penv (h-project-environment-create project-root))
+                                         (ptable (h-package-table-create penv)))))
 
-(cl-defmethod h-list-deps ((this h-project-environment) package-path)
-  "Return the list of dependencies of PACKAGE-PATH, given a project
-environment."
-  (let* ((ptable (h-package-table-create this)))
-    (hash-table-keys (h-find-dependencies ptable package-path))))
+(efs-use-fixtures test1 (ht-fixture1)
+  :tags '(package-table find-dependencies)
+  (should (equal (h-find-dependencies ptable "Study.java")
+                 '("defs.Data"))))
+
+(efs-use-fixtures test2 (ht-fixture1)
+  :tags '(package-table get-package)
+  (should (string= (h-get-package penv "Study.java"))))
+
 
 (provide 'h-package-table)
 
 ;; Local Variables:
-;; read-symbol-shorthands: (("h-" . "hmake-") ("hu-" . "hmake-utils-"))
+;; read-symbol-shorthands: (("h-" . "hmake-") ("hu-" . "hmake-utils-") ("efs-" . "ert-fixtures-") ("ht-" . "hmake-tests-"))
 ;; End:
