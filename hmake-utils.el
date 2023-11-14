@@ -1,8 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
 (defun hu-strip-non-code-artefacts ()
-(defun hu-get-current-line ()
-  "Return the line POINT is on in the current temporary buffer."
   "Strip the current buffer of non-code artefacts."
   (save-excursion
     (rx-let ((java-multi-line-comment
@@ -19,6 +17,9 @@
                                         java-string))
                                 nil t)
         (replace-match "")))))
+
+(defun hu-get-current-line (tmp-buffer)
+  "In the current buffer, return the line POINT is on."
   (string-trim (buffer-substring-no-properties (line-beginning-position)
                                                (line-end-position))))
 
