@@ -29,6 +29,18 @@
   "Check whether PACKAGE is one of the project's packages."
   (gethash package (h-package-table-table this)))
 
+(cl-defmethod h-get-parent-package ((this h-package-table) package-path)
+  "Return the parent package of PACKAGE-PATH."
+  (h-get-package (h-package-table-penv this) package-path))
+
+(cl-defmethod h-member-default-p ((this h-package-table) package-path)
+  "Return whether PACKAGE-PATH is a member of the default package."
+  (equal "default" (h-get-parent-package this package-path)))
+
+(cl-defmethod h-get-siblings ((this h-package-table) package-path)
+  "Return the files that belong to the same package as PACKAGE-PATH."
+  (h-get-files this (h-get-parent-package this package-path)))
+
 (cl-defmethod h-analyze-imports ((this h-package-table) tmp-buffer)
   "Analyze the various import statements inside TMP-BUFFER.
 
