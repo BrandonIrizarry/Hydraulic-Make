@@ -134,9 +134,8 @@ PACKAGE-PATH."
                               (t (when-let ((index (seq-position prefixes intended-package)))
                                    (nth (1+ index) prefixes))))))))
           (and dep (push dep deps))))
-      ;; Return the dependencies we found, removing duplicates, and
-      ;; flattening to remove occurrences of NIL.
-      (cl-remove-duplicates (flatten-list deps) :test #'equal))))
+      ;; Return the dependencies we found, removing duplicates.
+      (cl-remove-duplicates deps :test #'equal))))
 
 ;; Tests
 (require 'ert-fixtures)
