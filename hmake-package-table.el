@@ -129,7 +129,11 @@ PACKAGE-PATH."
                       (cond (intended-package (cl-second intended-package))
                             ((and (h-member-default-p this package-path)
                                   (member basename local-files))
-                             (concat "default." basename))))))))
+                             (concat "default." basename))
+                            ;; Package-local static reference
+                            ((cdr (assoc (concat parent-package "." basename)
+                                         (h-project-environment-package-to-file-alist (h-package-table-penv this))))
+                             (concat parent-package "." basename))))))))
           (and dep (push dep deps))))
       ;; Return the dependencies we found, removing duplicates.
       (cl-remove-duplicates deps :test #'equal))))
@@ -156,7 +160,7 @@ PACKAGE-PATH."
                  (sort (h-find-dependencies ptable "Madrid.java") #'string<))))
 
 ;; BUGS:
-;; week3example.MazeLoader isn't found.
+;; week3example.Maze is being overcaptured.
 (efs-use-fixtures test3 (ht-fixture2)
   :tags '(package-table find-dependencies)
   (should (equal '("week3example.MazeLoader" "week3example.MazeNode")
