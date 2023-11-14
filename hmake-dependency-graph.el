@@ -6,10 +6,11 @@
   graph)
 
 (cl-defmethod h-dependency-graph-create ((penv h-project-environment))
-  (let ((graph (make-hash-table :test #'equal)))
+  (let ((graph (make-hash-table :test #'equal))
+        (ptable (h-package-table-create penv)))
     (dolist (package-path (h-project-environment-files penv) graph)
       (puthash package-path
-               (cl-loop for pkg-dep in (h-list-deps penv package-path) collect
+               (cl-loop for pkg-dep in (h-find-dependencies ptable package-path) collect
                      (cdr (assoc pkg-dep (h-project-environment-package-to-file-alist penv))))
                graph))
     (h-dependency-graph--create :graph graph)))
