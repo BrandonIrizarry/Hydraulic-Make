@@ -56,9 +56,9 @@ the type being used."
                    ;; followed by what's imported.
                    (import-static-p
                     (cl-assert (>= 3 (length prefixes)))
-                    (let ((package (nth (- (length prefixes) 3) prefixes)))
+                    (let ((package (hu-nth-last 3 prefixes)))
                       (when (h-package-p this package)
-                        (nth (- (length prefixes) 2) prefixes))))
+                        (hu-nth-last 2 prefixes))))
 
                    ;; Glob used with (non-static) import
                    ((string-match-p "\\.\\*;\\'" argument)
@@ -149,7 +149,6 @@ PACKAGE-PATH."
 ;; default.MazeLoader - correct, but not in default package
 ;; default.MazeNode - same.
 ;; week3example.MazeNode - correct. But why is this one here, and not MazeLoader?
-;; - A bunch of java.util stuff is listed, meaning our import-scanning function is broken.
 (efs-use-fixtures test3 (ht-fixture2)
   :tags '(package-table find-dependencies)
   (h-find-dependencies ptable "week3example/Maze.java"))

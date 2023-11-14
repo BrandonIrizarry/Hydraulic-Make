@@ -66,11 +66,20 @@ parent prefix as the sought-after dependency."
               prefixes))
       (nreverse prefixes))))
 
+;; DEPRECATED (use 'get-successive-prefixes' with 'nth-last')
 (defun hu-get-penultimate-prefix (identifier)
   "Return the penultimate prefix of IDENTIFIER."
   (string-match (rx hu-java-compound-identifier) identifier)
   (let ((penultimate-prefix (match-string-no-properties 1 identifier)))
     (string-remove-suffix "." penultimate-prefix)))
+
+(defun hu-nth-last (n lst)
+  "Return the N-th element from the end of LST.
+
+Return NIL if out-of-bounds."
+  (let ((len (length lst)))
+    (when (<= n len)
+      (nth (- (length lst) n) lst))))
 
 (provide 'hmake-utils)
 
