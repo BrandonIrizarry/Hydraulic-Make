@@ -21,21 +21,9 @@
 (cl-defmethod h-get-file ((this h-package-table) package-path &key type)
   (h-get-file (h-package-table-penv this) package-path :type type))
 
-;; Not used in this file
-(cl-defmethod h-pretty-print ((this h-package-table))
-  "Pretty-print HMAKE-PACKAGE-TABLE."
-  (mapcar (pcase-lambda (`(,package-name . ,package-files))
-              (cons package-name package-files))
-          (map-pairs (h-package-table-table this))))
-
 (cl-defmethod h-get-files ((this h-package-table) package)
   "Return the list of files under PACKAGE."
   (gethash package (h-package-table-table this)))
-
-;; Not used in this file
-(cl-defmethod h-get-all-packages ((this h-package-table))
-  "Return a list of all packages."
-  (hash-table-keys (h-package-table-hash-table this)))
 
 (cl-defmethod h-package-p ((this h-package-table) package)
   "Check whether PACKAGE is one of the project's packages."
