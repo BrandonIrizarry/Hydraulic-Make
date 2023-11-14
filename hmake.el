@@ -41,7 +41,7 @@
 (defun hmake--setup (project-root package-subdir class-subdir)
   "Use an approach where the build and run commands are predefined
 by this setup command."
-  (let ((penv (h-project-environment-create (expand-file-name project-root) package-subdir class-subdir)))
+  (let ((penv (h-project-environment-create (expand-file-name project-root) :src package-subdir :bin class-subdir)))
 
     (defun eshell/hmake-build-command (&optional target)
       "Insert the appropriate build command into the Eshell promqpt.
