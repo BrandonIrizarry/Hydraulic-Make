@@ -153,17 +153,17 @@ PACKAGE-PATH."
                                          (ptable (h-package-table-create penv)))))
 
 (efs-use-fixtures test1 (ht-fixture1)
-  :tags '(package-table find-dependencies)
+  :tags '(fake-project package-table find-dependencies)
   (should (equal (h-find-dependencies ptable "Study.java")
                  '("defs.Data"))))
 
 (efs-use-fixtures test2 (ht-fixture1)
-  :tags '(package-table get-package)
+  :tags '(fake-project package-table get-package)
   (should (equal '("andaluz.Sevilla" "default.Berlin" "default.Paris")
                  (sort (h-find-dependencies ptable "Madrid.java") #'string<))))
 
 (efs-use-fixtures test3 (ht-fixture2)
-  :tags '(package-table find-dependencies)
+  :tags '(ucsd-mapapp package-table find-dependencies)
   (should (equal '("week3example.MazeLoader" "week3example.MazeNode")
                  (sort (h-find-dependencies ptable "week3example/Maze.java") #'string<))))
 
