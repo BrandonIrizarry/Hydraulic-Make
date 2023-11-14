@@ -121,7 +121,7 @@ PACKAGE-PATH."
                                (concat "default." (car prefixes)))
                               (t (when-let ((index (seq-position prefixes intended-package)))
                                    (nth (1+ index) prefixes))))))))
-          (push dep deps)))
+          (and dep (push dep deps))))
       ;; Return the dependencies we found, removing duplicates, and
       ;; flattening to remove occurrences of NIL.
       (cl-remove-duplicates (flatten-list deps) :test #'equal))))
