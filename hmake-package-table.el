@@ -120,10 +120,11 @@ PACKAGE-PATH."
         (let* ((identifier (match-string-no-properties 0))
                (prefixes (hu-get-successive-prefixes identifier 'ascending))
                (dep
-                (let ((basename (car prefixes)))
+                (let ((basename (car prefixes))
+                      (parent-package (h-get-parent-package this package-path)))
                   (if (and (null (cdr prefixes))
                            (member basename local-files))
-                      (concat (h-get-parent-package this package-path) "." basename)
+                      (concat parent-package "." basename)
                     (let ((intended-package (cl-member-if (lambda (prefix) (h-package-p this prefix)) prefixes)))
                       (cond (intended-package (cl-second intended-package))
                             ((and (h-member-default-p this package-path)
