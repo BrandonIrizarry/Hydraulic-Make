@@ -164,7 +164,8 @@ PACKAGE-PATH."
 ;; week3example.MazeNode - correct. But why is this one here, and not MazeLoader?
 (efs-use-fixtures test3 (ht-fixture2)
   :tags '(package-table find-dependencies)
-  (h-find-dependencies ptable "week3example/Maze.java"))
+  (should (equal '("week3example.MazeLoader" "week3example.MazeNode")
+                 (sort (h-find-dependencies ptable "week3example/Maze.java") #'string<))))
 
 (provide 'h-package-table)
 
