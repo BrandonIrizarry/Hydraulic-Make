@@ -114,8 +114,11 @@ PACKAGE-PATH."
                           (when (member identifier local-files)
                             (concat parent-package "." identifier)))
                       (let ((intended-package (cl-find-if (lambda (prefix) (h-package-p this prefix)) prefixes :from-end t)))
-                        (when-let ((index (seq-position prefixes intended-package)))
-                          (nth (1+ index) prefixes))))))
+                        (cond ((and (null intended-package)
+                                    (member (car prefixes) local-files))
+                               (concat "default." (car prefixes)))
+                              (t (when-let ((index (seq-position prefixes intended-package)))
+                                   (nth (1+ index) prefixes))))))))
           (push dep deps)))
       ;; Return the dependencies we found, removing duplicates, and
       ;; flattening to remove occurrences of NIL.
