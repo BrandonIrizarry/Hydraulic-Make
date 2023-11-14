@@ -131,6 +131,10 @@ PACKAGE-PATH."
                                          (penv (h-project-environment-create project-root))
                                          (ptable (h-package-table-create penv)))))
 
+(defvar ht-fixture2 (efs-define-fixture ((project-root "~/eclipse-workspace2/UCSDGraphs/")
+                                         (penv (h-project-environment-create project-root))
+                                         (ptable (h-package-table-create penv)))))
+
 (efs-use-fixtures test1 (ht-fixture1)
   :tags '(package-table find-dependencies)
   (should (equal (h-find-dependencies ptable "Study.java")
@@ -141,6 +145,14 @@ PACKAGE-PATH."
   (should (equal '("andaluz.Sevilla" "default.Berlin" "default.Paris")
                  (sort (h-find-dependencies ptable "Madrid.java") #'string<))))
 
+;; BUGS:
+;; default.MazeLoader - correct, but not in default package
+;; default.MazeNode - same.
+;; week3example.MazeNode - correct. But why is this one here, and not MazeLoader?
+;; - A bunch of java.util stuff is listed, meaning our import-scanning function is broken.
+(efs-use-fixtures test3 (ht-fixture2)
+  :tags '(package-table find-dependencies)
+  (h-find-dependencies ptable "week3example/Maze.java"))
 
 (provide 'h-package-table)
 
