@@ -50,13 +50,16 @@ semicolon if present."
 ;; _parent prefix_ of PREFIX.
 (rx-define hu-java-compound-identifier (: (group (* hu-java-identifier ".")) hu-java-identifier))
 
-(defun hu-get-successive-prefixes (identifier)
+(defun hu-get-successive-prefixes (identifier &optional reversep)
   "Return a list of successive prefixes within the compound
-identifier IDENTIFIER.
+identifier IDENTIFIER, in descending order of length.
 
 The idea is to later check each one to see if it's a valid
-package. The first one that isn't marks where to extract the
-parent prefix as the sought-after dependency."
+package. The first one that isn't will mark where to extract the
+parent prefix as the sought-after dependency.
+
+Depending on how this utility is used, REVERSEP can be used to
+return the prefixes in ascending order."
   (with-temp-buffer
     (insert (string-trim identifier))
     (let* ((beginning (goto-char (point-min)))
@@ -65,7 +68,9 @@ parent prefix as the sought-after dependency."
       (while (setq current-pos (re-search-forward (rx hu-java-identifier) nil t))
         (push (buffer-substring-no-properties beginning current-pos)
               prefixes))
-      (nreverse prefixes))))
+      (if reversep
+          (reverse prefixes)
+        prefixes))))
 
 ;; DEPRECATED (use 'get-successive-prefixes' with 'nth-last')
 (defun hu-get-penultimate-prefix (identifier)

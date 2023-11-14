@@ -68,9 +68,9 @@ the type being used."
                    ;; followed by what's imported.
                    (import-static-p
                     (cl-assert (>= 3 (length prefixes)))
-                    (let ((package (hu-nth-last 3 prefixes)))
+                    (let ((package (cl-third prefixes)))
                       (when (h-package-p this package)
-                        (hu-nth-last 2 prefixes))))
+                        (cl-second prefixes))))
 
                    ;; Glob used with (non-static) import
                    ((string-match-p "\\.\\*;\\'" argument)
@@ -83,7 +83,7 @@ the type being used."
 
                    ;; Ordinary import.
                    (t
-                    (let ((package (hu-nth-last 2 prefixes)))
+                    (let ((package (cl-second prefixes)))
                       (and (h-package-p this package) package))))))
             (push dep deps))))
       ;; Upon exiting the while loop, we've reached the end of the
