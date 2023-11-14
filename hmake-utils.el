@@ -18,7 +18,8 @@
                                 nil t)
         (replace-match "")))))
 
-(defun hu-get-current-line (tmp-buffer)
+;; DEPRECATED (use 'get-rest-of-line')
+(defun hu-get-current-line ()
   "In the current buffer, return the line POINT is on."
   (string-trim (buffer-substring-no-properties (line-beginning-position)
                                                (line-end-position))))
