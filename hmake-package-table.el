@@ -135,7 +135,8 @@ PACKAGE-PATH."
 
 (efs-use-fixtures test2 (ht-fixture1)
   :tags '(package-table get-package)
-  (should (string= (h-get-package penv "Study.java"))))
+  (should (equal '("andaluz.Sevilla" "default.Berlin" "default.Paris")
+                 (sort (h-find-dependencies ptable "Madrid.java") #'string<))))
 
 
 (provide 'h-package-table)
