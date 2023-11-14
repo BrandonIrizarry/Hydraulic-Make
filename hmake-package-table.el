@@ -70,7 +70,9 @@ the type being used."
                           collect (h-get-file this file :type 'package)))
 
                    ;; Ordinary import.
-                   (t argument))))
+                   (t
+                    (let ((package (hu-nth-last 2 prefixes)))
+                      (and (h-package-p this package) package))))))
             (push dep deps))))
       ;; Upon exiting the while loop, we've reached the end of the
       ;; buffer; so let's find our way back to the last import
