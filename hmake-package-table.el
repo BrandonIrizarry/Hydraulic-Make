@@ -72,12 +72,15 @@ the type being used."
                       (when (h-package-p this package)
                         (cl-second prefixes))))
 
-                   ;; Glob used with (non-static) import
-                   ((string-match-p "\\.\\*;\\'" argument)
-                    (cl-loop
-                          for file in (h-get-files this penultimate-prefix)
-                          when (h-get-file this file :type 'package)
-                          collect (h-get-file this file :type 'package)))
+                   ;; Glob used with (non-static) import.
+                   ((string-match-p "\\.\\*\\'" argument)
+                    ;; The asterisk isn't included among the
+                    ;; PREFIXES. Hence, we must iterate over the files
+                    ;; given by the first prefix (a package).
+                    (when (h-package-p this (cl-first prefixes))
+                      (cl-loop
+                            for file in (h-get-files this (cl-first prefixes))
+                            collect (h-get-file this file :type 'package))))
 
                    ;; Ordinary import.
                    (t
