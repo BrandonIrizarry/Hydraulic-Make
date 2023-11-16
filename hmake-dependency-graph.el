@@ -11,6 +11,8 @@
     (dolist (package-path (h-project-environment-files penv) graph)
       (puthash package-path
                (cl-loop for pkg-dep in (h-find-dependencies ptable package-path) collect
+                     ;; Get back the file we need for the build
+                     ;; command
                      (cdr (assoc pkg-dep (h-project-environment-package-to-file-alist penv))))
                graph))
     (h-dependency-graph--create :graph graph)))
