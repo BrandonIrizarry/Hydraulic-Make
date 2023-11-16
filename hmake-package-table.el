@@ -74,8 +74,6 @@ the type being used."
 
                    ;; Glob used with (non-static) import
                    ((string-match-p "\\.\\*;\\'" argument)
-                    ;; Note: we flatten DEPS at the end in case
-                    ;; this code path gets hit.
                     (cl-loop
                           for file in (h-get-files this penultimate-prefix)
                           when (h-get-file this file :type 'package)
