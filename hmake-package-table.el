@@ -155,8 +155,8 @@ PACKAGE-PATH."
 
 (efs-use-fixtures test1 (ht-fixture1)
   :tags '(fake-project package-table find-dependencies)
-  (should (equal (h-find-dependencies ptable "Study.java")
-                 '("defs.Data"))))
+  (should (equal '("andaluz.Malaga" "andaluz.Sevilla" "defs.Data")
+                 (sort (h-find-dependencies ptable "Study.java") #'string<))))
 
 (efs-use-fixtures test2 (ht-fixture1)
   :tags '(fake-project package-table get-package)
