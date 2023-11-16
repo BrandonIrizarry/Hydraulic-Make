@@ -149,28 +149,31 @@ PACKAGE-PATH."
 ;; Tests
 (require 'ert-fixtures)
 
-(defvar ht-fixture1 (efs-define-fixture ((project-root "~/Java/FakeProject/")
-                                         (penv (h-project-environment-create project-root))
-                                         (ptable (h-package-table-create penv)))))
+(defvar ht-fixture1 (efs-define-fixture ((ht-project-root "~/Java/FakeProject/")
+                                         (ht-penv (h-project-environment-create ht-project-root))
+                                         (ht-ptable (h-package-table-create ht-penv)))))
 
-(defvar ht-fixture2 (efs-define-fixture ((project-root "~/eclipse-workspace2/UCSDGraphs/")
-                                         (penv (h-project-environment-create project-root))
-                                         (ptable (h-package-table-create penv)))))
+(defvar ht-fixture2 (efs-define-fixture ((ht-project-root "~/eclipse-workspace2/UCSDGraphs/")
+                                         (ht-penv (h-project-environment-create ht-project-root))
+                                         (ht-ptable (h-package-table-create ht-penv)))))
 
 (efs-use-fixtures test1 (ht-fixture1)
   :tags '(fake-project package-table find-dependencies)
+  (defvar ht-ptable)
   (should (equal '("andaluz.Malaga" "andaluz.Sevilla" "defs.Data")
-                 (sort (h-find-dependencies ptable "Study.java") #'string<))))
+                 (sort (h-find-dependencies ht-ptable "Study.java") #'string<))))
 
 (efs-use-fixtures test2 (ht-fixture1)
   :tags '(fake-project package-table get-package)
+  (defvar ht-ptable)
   (should (equal '("andaluz.Sevilla" "default.Berlin" "default.Paris")
-                 (sort (h-find-dependencies ptable "Madrid.java") #'string<))))
+                 (sort (h-find-dependencies ht-ptable "Madrid.java") #'string<))))
 
 (efs-use-fixtures test3 (ht-fixture2)
   :tags '(ucsd-mapapp package-table find-dependencies)
+  (defvar ht-ptable)
   (should (equal '("week3example.MazeLoader" "week3example.MazeNode")
-                 (sort (h-find-dependencies ptable "week3example/Maze.java") #'string<))))
+                 (sort (h-find-dependencies ht-ptable "week3example/Maze.java") #'string<))))
 
 (provide 'h-package-table)
 
