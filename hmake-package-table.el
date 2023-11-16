@@ -90,7 +90,10 @@ the type being used."
                    (t
                     (let ((package (cl-second prefixes)))
                       (and (h-package-p this package) package))))))
-            (push dep deps))))
+            ;; DEP can be a list of packages imported by a glob.
+            (if (listp dep)
+                (setq deps (nconc deps dep))
+              (push dep deps)))))
       ;; Upon exiting the while loop, we've reached the end of the
       ;; buffer; so let's find our way back to the last import
       ;; statement, and then move forward to the beginning of the next
@@ -106,10 +109,7 @@ the type being used."
             (and (re-search-forward "package" nil t)
                  (forward-line 1))))
       ;; Return the dependencies we've found so far.
-      ;;
-      ;; Flatten the list in case there are instances of plain-import
-      ;; globs.
-      (flatten-list deps))))
+      deps)))
 
 (cl-defmethod h-find-dependencies ((this h-package-table) package-path)
   "Find and return the list of immediate dependencies of
