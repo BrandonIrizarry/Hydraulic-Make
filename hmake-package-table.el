@@ -76,14 +76,15 @@ the type being used."
                    ((string-match-p "\\.\\*\\'" argument)
                     ;; The asterisk isn't included among the
                     ;; PREFIXES. Hence, we must iterate over the files
-                    (when (h-package-p this (cl-first prefixes))
-                      (cl-loop
-                            for file in (h-get-files this (cl-first prefixes))
-                            collect (h-get-file this file :type 'package))))
                     ;; given by the package represented by the first
                     ;; prefix. (In prior iterations of the code, we
                     ;; would tokenize ARGUMENT, and so it was included
                     ;; in those schemes.)
+                    (let ((package (cl-first prefixes)))
+                      (when (h-package-p this package)
+                        (cl-loop
+                              for file in (h-get-files this package)
+                              collect (h-get-file this file :type 'package)))))
 
                    ;; Ordinary import.
                    (t
