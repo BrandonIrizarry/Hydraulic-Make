@@ -115,7 +115,7 @@ the type being used."
   "Find and return the list of immediate dependencies of
 PACKAGE-PATH."
   (with-temp-buffer
-    (insert-file (h-get-file this package-path :type 'full))
+    (insert-file-contents (h-get-file this package-path :type 'full))
     (hu-strip-non-code-artefacts)
 
     (let ((deps (h-analyze-imports this (current-buffer)))

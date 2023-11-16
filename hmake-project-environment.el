@@ -54,7 +54,7 @@ gmapsfx/shapes/CircleOptions.java, this method returns
         (throw 'cached (string-remove-suffix suffix cached-package)))
       (let ((package
              (with-temp-buffer
-               (insert-file (h-get-file this package-path :type 'full))
+               (insert-file-contents (h-get-file this package-path :type 'full))
                (hu-strip-non-code-artefacts)
 
                ;; Find the package declaration, if any.
