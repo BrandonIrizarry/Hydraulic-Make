@@ -54,10 +54,6 @@ semicolon if present."
   "Return a list of successive prefixes within the compound
 identifier IDENTIFIER, in descending order of length.
 
-The idea is to later check each one to see if it's a valid
-package. The first one that isn't will mark where to extract the
-parent prefix as the sought-after dependency.
-
 Depending on how this utility is used, REVERSEP can be used to
 return the prefixes in ascending order."
   (with-temp-buffer
