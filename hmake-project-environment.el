@@ -56,9 +56,11 @@ gmapsfx/shapes/CircleOptions.java, this method returns
              (with-temp-buffer
                (insert-file (h-get-file this package-path :type 'full))
                (hu-strip-non-code-artefacts)
-               (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
-               (or (match-string-no-properties 1)
-                   "default"))))
+
+               ;; Find the package declaration, if any.
+               (if (re-search-forward (rx "package" (+ space) (group (+ not-newline)) ";") nil t)
+                   (match-string-no-properties 1)
+                 "default"))))
         ;; Cache the package-name-to-file association.
         (push (cons (concat package suffix)
                     package-path)
