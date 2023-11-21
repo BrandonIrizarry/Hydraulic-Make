@@ -46,12 +46,10 @@
 
 Return the list of dependencies DEPS.
 
-IMPORT: If the penultimate prefix is a package, then do the
-following: If the argument has a glob, add the implied members to
-DEPS. Else, add the argument itself to DEPS.
-
-IMPORT STATIC: Use HMAKE-UTILS-GET-SUCCESSIVE-PREFIXES to find
-the type being used."
+The function HMAKE-UTILS-GET-SUCCESSIVE-PREFIXES (which see) gets
+the list of prefixes in descending order. This list has different
+meanings based on whether we see \"import static\", a globbed
+import, or a non-globbed import."
   (with-current-buffer tmp-buffer
     (goto-char (point-min))
     (let ((deps (list)))
