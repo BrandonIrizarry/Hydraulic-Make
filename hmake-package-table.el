@@ -88,8 +88,8 @@ the type being used."
 
                    ;; Ordinary import.
                    (t
-                    (let ((package (cl-second prefixes)))
-                      (and (h-package-p this package) (cl-first prefixes)))))))
+                    (seq-let (package-member package) prefixes
+                      (and (h-package-p this package) package-member))))))
             ;; DEP can be a list of packages imported by a glob.
             (if (listp dep)
                 (setq deps (nconc deps dep))
