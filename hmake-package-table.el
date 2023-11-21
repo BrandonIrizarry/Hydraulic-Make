@@ -63,14 +63,17 @@ the type being used."
                (prefixes (hu-get-successive-prefixes argument)))
           (let ((dep
                  (cond
-                   ;; Static imports must have at least one package
-                   ;; prefixing everything, followed by the datatype,
-                   ;; followed by what's imported.
+                   ;; Prefix-format for static imports: (static-member
+                   ;; parent-class parent-package)
+                   ;;
+                   ;; The parent class is the package member we're
+                   ;; interested in as a dependency. The parent
+                   ;; package is simply referred to here as `package'.
+                   ;; The static member being imported is ignored.
                    (import-static-p
                     (cl-assert (>= 3 (length prefixes)))
-                    (let ((package (cl-third prefixes)))
-                      (when (h-package-p this package)
-                        (cl-second prefixes))))
+                    (seq-let (_ package-member package) prefixes
+                      (and (h-package-p this package) package-member)))
 
                    ;; Glob used with (non-static) import.
                    ((string-match-p "\\.\\*\\'" argument)
