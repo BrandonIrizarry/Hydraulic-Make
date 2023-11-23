@@ -17,6 +17,9 @@
         (mapconcat #'identity (append command full-filenames) " ")))))
 
 (defun eshell/hmake-setup (&rest args)
+  "This command locates our project files, and then defines a pair
+of builder and runner \"macros\" which output the appropriate
+build and run commands, respectively."
   ;; I'm not sure if it's possible to temporarily set
   ;; ELISP-LISP-REGEXP for the scope of these calls, so we must intern
   ;; keyword-like strings manually.
@@ -40,7 +43,9 @@
 
 (defun hmake--setup (project-root package-subdir class-subdir)
   "Use an approach where the build and run commands are predefined
-by this setup command."
+by this setup command.
+
+Here is where we also establish the files used by our project."
   (let ((penv (h-project-environment-create (expand-file-name project-root) :src package-subdir :bin class-subdir)))
 
     (defun eshell/hmake-build-command (&optional target)
